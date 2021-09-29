@@ -32,6 +32,8 @@ struct KEY key[KEYWORDSIZE] = {
 	{"writeln",	TWRITELN}
 };
 
+int cbuf;
+
 /* Token counter */
 int numtoken[NUMOFTOKEN+1];
 
@@ -68,4 +70,14 @@ int main(int nc, char *np[]) {
 void error(char *mes) {
 	printf("\n ERROR: %s\n", mes);
 	end_scan();
+}
+
+int init_scan(char* filename){
+	FILE *fp;
+	if((fp = fopen(filename, "r")) == NULL){
+		return -1;
+	}
+
+	cbuf = fgetc(fp);
+	return 0;
 }
