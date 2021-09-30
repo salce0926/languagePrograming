@@ -33,6 +33,8 @@ struct KEY key[KEYWORDSIZE] = {
 };
 
 int cbuf;
+int num_attr;
+FILE *fp;
 
 /* Token counter */
 int numtoken[NUMOFTOKEN+1];
@@ -73,11 +75,84 @@ void error(char *mes) {
 }
 
 int init_scan(char* filename){
-	FILE *fp;
+	// FILE *fp;
 	if((fp = fopen(filename, "r")) == NULL){
 		return -1;
 	}
 
 	cbuf = fgetc(fp);
 	return 0;
+}
+
+int scan(){
+	int buf[MAXSTRSIZE];
+	while(cbuf != EOF){
+		//空白は読み飛ばす
+		if(isspace(cbuf)) continue;
+		//注釈も読み飛ばす
+		else if(cbuf == "{"){
+			while(cbuf != "}") cbuf = fgetc(fp);
+		}
+		else if(cbuf == "/"){
+			cbuf = fgetc(fp);
+			if(cbuf != "*"){
+				//注釈ではないし、symbolに"/"は存在しない
+				return -1;
+			}
+			int skip = 0;
+			while(!(cbuf == "/" && skip == 1)){
+				// if(cbuf == "/" && skip == 1) break;
+				if(cbuf == "*") skip = 1;
+			}
+			continue;
+		}
+		//英字の場合、英数字が続く限り読み込んで名前かキーワードかを判別する
+		else if(isalpha(cbuf)){
+			int i = 0;
+			while(isalnum(cbuf)){
+				buf[i++] = cbuf;
+			}
+			for(i = 0; i < KEYWORDSIZE; i++){
+				if(strcmp(buf, key[i][0]) == 0){
+					return key[i][0];
+				}
+				return TNAME;
+			}
+		}
+		//数字の場合、数字が続く限り読み込んで値を格納する
+		else if(isdigit(cbuf)){
+			int i = 0;
+			while(isdigit(cbuf)) buf[i++] = cbuf;
+			num_attr = atoi(buf);
+			return TNUMBER;
+		}
+		//記号の判別
+		else if(cbuf == "+") return TPLUS;
+		else if(cbuf == "-") return TMINUS;
+		else if(cbuf == "*") return TSTAR;
+		else if(cbuf == "=") return TEQUAL;
+		else if(cbuf == "<"){
+			cbuf = fgetc(fp);
+			if(cbuf == ">") return TNOTEQ;
+			else if(cbuf == "=") return TLEEQ;
+			else return TLE;
+		}
+		else if(cbuf == ">"){
+			cbuf = fgetc(fp);
+			if(cbuf == "=") return TGREQ;
+			else return TGR;
+		}
+		else if(cbuf == "(") return TLPAREN;
+		else if(cbuf == ")") return TRPAREN;
+		else if(cbuf == "[") return TLSQPAREN;
+		else if(cbuf == "]") return TRSQPAREN;
+		else if(cbuf == ":"){
+			cbuf = fgetc(fp);
+			if(cbuf == "=") return TASSIGN;
+			else return TCOLON;
+		}
+		else if(cbuf == ".") return TDOT;
+		else if(cbuf == ",") return TCOMMA;
+		else if(cbuf == ";") return TSEMI;
+	}
 }
