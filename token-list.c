@@ -85,24 +85,24 @@ int init_scan(char* filename){
 }
 
 int scan(){
-	int buf[MAXSTRSIZE];
+	char buf[MAXSTRSIZE];
 	while(cbuf != EOF){
 		//空白は読み飛ばす
 		if(isspace(cbuf)) continue;
 		//注釈も読み飛ばす
-		else if(cbuf == "{"){
-			while(cbuf != "}") cbuf = fgetc(fp);
+		else if(cbuf == '{'){
+			while(cbuf != '}') cbuf = fgetc(fp);
 		}
-		else if(cbuf == "/"){
+		else if(cbuf == '/'){
 			cbuf = fgetc(fp);
-			if(cbuf != "*"){
+			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
 				return -1;
 			}
 			int skip = 0;
-			while(!(cbuf == "/" && skip == 1)){
+			while(!(cbuf == '/' && skip == 1)){
 				// if(cbuf == "/" && skip == 1) break;
-				if(cbuf == "*") skip = 1;
+				if(cbuf == '*') skip = 1;
 			}
 			continue;
 		}
@@ -113,8 +113,8 @@ int scan(){
 				buf[i++] = cbuf;
 			}
 			for(i = 0; i < KEYWORDSIZE; i++){
-				if(strcmp(buf, key[i][0]) == 0){
-					return key[i][0];
+				if(strcmp(buf, key[i].keyword) == 0){
+					return key[i].keytoken;
 				}
 				return TNAME;
 			}
@@ -127,32 +127,32 @@ int scan(){
 			return TNUMBER;
 		}
 		//記号の判別
-		else if(cbuf == "+") return TPLUS;
-		else if(cbuf == "-") return TMINUS;
-		else if(cbuf == "*") return TSTAR;
-		else if(cbuf == "=") return TEQUAL;
-		else if(cbuf == "<"){
+		else if(cbuf == '+') return TPLUS;
+		else if(cbuf == '-') return TMINUS;
+		else if(cbuf == '*') return TSTAR;
+		else if(cbuf == '=') return TEQUAL;
+		else if(cbuf == '<'){
 			cbuf = fgetc(fp);
-			if(cbuf == ">") return TNOTEQ;
-			else if(cbuf == "=") return TLEEQ;
+			if(cbuf == '>') return TNOTEQ;
+			else if(cbuf == '=') return TLEEQ;
 			else return TLE;
 		}
-		else if(cbuf == ">"){
+		else if(cbuf == '>'){
 			cbuf = fgetc(fp);
-			if(cbuf == "=") return TGREQ;
+			if(cbuf == '=') return TGREQ;
 			else return TGR;
 		}
-		else if(cbuf == "(") return TLPAREN;
-		else if(cbuf == ")") return TRPAREN;
-		else if(cbuf == "[") return TLSQPAREN;
-		else if(cbuf == "]") return TRSQPAREN;
-		else if(cbuf == ":"){
+		else if(cbuf == '(') return TLPAREN;
+		else if(cbuf == ')') return TRPAREN;
+		else if(cbuf == '[') return TLSQPAREN;
+		else if(cbuf == ']') return TRSQPAREN;
+		else if(cbuf == ':'){
 			cbuf = fgetc(fp);
-			if(cbuf == "=") return TASSIGN;
+			if(cbuf == '=') return TASSIGN;
 			else return TCOLON;
 		}
-		else if(cbuf == ".") return TDOT;
-		else if(cbuf == ",") return TCOMMA;
-		else if(cbuf == ";") return TSEMI;
+		else if(cbuf == '.') return TDOT;
+		else if(cbuf == ',') return TCOMMA;
+		else if(cbuf == ';') return TSEMI;
 	}
 }
