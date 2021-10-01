@@ -34,6 +34,7 @@ struct KEY key[KEYWORDSIZE] = {
 
 int cbuf;
 int num_attr;
+char string_attr[MAXSTRSIZE];
 FILE *fp;
 
 /* Token counter */
@@ -85,7 +86,6 @@ int init_scan(char* filename){
 }
 
 int scan(){
-	char buf[MAXSTRSIZE];
 	while(cbuf != EOF){
 		//空白は読み飛ばす
 		if(isspace(cbuf)) continue;
@@ -110,10 +110,10 @@ int scan(){
 		else if(isalpha(cbuf)){
 			int i = 0;
 			while(isalnum(cbuf)){
-				buf[i++] = cbuf;
+				string_attr[i++] = cbuf;
 			}
 			for(i = 0; i < KEYWORDSIZE; i++){
-				if(strcmp(buf, key[i].keyword) == 0){
+				if(strcmp(string_attr, key[i].keyword) == 0){
 					return key[i].keytoken;
 				}
 				return TNAME;
@@ -122,8 +122,8 @@ int scan(){
 		//数字の場合、数字が続く限り読み込んで値を格納する
 		else if(isdigit(cbuf)){
 			int i = 0;
-			while(isdigit(cbuf)) buf[i++] = cbuf;
-			num_attr = atoi(buf);
+			while(isdigit(cbuf)) string_attr[i++] = cbuf;
+			num_attr = atoi(string_attr);
 			return TNUMBER;
 		}
 		//記号の判別
