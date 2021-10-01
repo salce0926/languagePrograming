@@ -70,6 +70,20 @@ int main(int nc, char *np[]) {
     return 0;
 }
 
+int my_getc(){
+	int cbuf = fgetc(fp);
+	if(cbuf == '\r'){
+		cbuf = fgetc(fp);
+		if(cbuf == '\n') cbuf = fgetc(fp);
+	}
+	else if(cbuf == '\n'){
+		cbuf = fgetc(fp);
+		if(cbuf == '\r') cbuf = fgetc(fp);
+	}
+	//行番号を管理
+	return cbuf;
+}
+
 void error(char *mes) {
 	printf("\n ERROR: %s\n", mes);
 	end_scan();
