@@ -105,3 +105,7 @@ int scan(){
 int get_linenum(){
     return linenum;
 }
+
+void end_scan(){
+	fclose(fp);
+}
