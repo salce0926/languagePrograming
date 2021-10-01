@@ -3,9 +3,9 @@
 #
 OBJS=token-list.o id-list.o scan.o
 
-all: main
+all: scan
 
-main: ${OBJS}
+scan: ${OBJS}
 	${CC} -o $@ $^
 
 clean:

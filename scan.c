@@ -1,8 +1,8 @@
 #include "token-list.h"
 
-static int cbuf;
-static int num_attr;
-static char string_attr[MAXSTRSIZE];
+int cbuf;
+int num_attr;
+char string_attr[MAXSTRSIZE];
 static int linenum = 0;
 FILE *fp;
 
