@@ -73,7 +73,10 @@ extern void error(char *mes);
 /* scan.c */
 extern int init_scan(char *filename);
 extern int scan(void);
+extern int cbuf;
 extern int num_attr;
 extern char string_attr[MAXSTRSIZE];
 extern int get_linenum(void);
 extern void end_scan(void);
+extern void check_line(void);
+extern void debug(void);
