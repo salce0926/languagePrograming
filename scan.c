@@ -4,7 +4,7 @@ int cbuf;
 int num_attr;
 char string_attr[MAXSTRSIZE];
 static int linenum = 0;
-static int newline = 0;
+static int newline = 1;
 static int is_debugmode = 0;
 FILE *fp;
 
@@ -13,12 +13,14 @@ int my_getc(){
 	int cbuf = fgetc(fp);
 	if(cbuf == '\r'){
 		cbuf = fgetc(fp);
-		if(cbuf == '\n') cbuf = fgetc(fp);
+		//NAME改行NAMEなどの時に困るので, 区切っておく
+		if(cbuf == '\n') cbuf = ' ';
 		newline = 1;
 	}
 	else if(cbuf == '\n'){
 		cbuf = fgetc(fp);
-		if(cbuf == '\r') cbuf = fgetc(fp);
+		//NAME改行NAMEなどの時に困るので, 区切っておく
+		if(cbuf == '\r') cbuf = ' ';
 		newline = 1;
 	}
 	return cbuf;
@@ -198,6 +200,7 @@ void check_line(){
 	if(newline == 1){
 		linenum++;
 		newline = 0;
+		printf("newline--------------------------------------------------\n");
 	}
 	cbuf = my_getc();
 	return;

@@ -72,6 +72,7 @@ int main(int nc, char *np[]) {
 		if(numtoken[i] == 0) continue;
 		printf("\"%s\"\t%d\n", tokenstr[i], numtoken[i]);
 	}
+	printf("number of line:%d\n", get_linenum());
 	printf("~~~~~~~~~~~~~~~~\n");
     return 0;
 }
