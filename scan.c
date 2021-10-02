@@ -30,7 +30,7 @@ int init_scan(char* filename){
 		return -1;
 	}
 
-	cbuf = fgetc(fp);
+	cbuf = my_getc();
 	return 0;
 }
 
@@ -199,7 +199,7 @@ void check_line(){
 		linenum++;
 		newline = 0;
 	}
-	cbuf = fgetc(fp);
+	cbuf = my_getc();
 	return;
 }
 
