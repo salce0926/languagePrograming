@@ -57,11 +57,21 @@ int main(int nc, char *np[]) {
 	return 0;
     }
     /* 作成する部分：トークンカウント用の配列？を初期化する */
+	for(i = 1; i <= NUMOFTOKEN; i++){
+		numtoken[i] = 0;
+	}
     while((token = scan()) >= 0) {
 	/* 作成する部分：トークンをカウントする */
+		numtoken[token]++;
     }
     end_scan();
     /* 作成する部分:カウントした結果を出力する */
+	printf("~~~~~result~~~~~\n");
+	for(i = 1; i <= NUMOFTOKEN; i++){
+		if(numtoken[i] == 0) continue;
+		printf("\"%s\"\t%d\n", tokenstr[i], numtoken[i]);
+	}
+	printf("~~~~~~~~~~~~~~~~\n");
     return 0;
 }
 

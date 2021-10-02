@@ -5,7 +5,7 @@ int num_attr;
 char string_attr[MAXSTRSIZE];
 static int linenum = 0;
 static int newline = 0;
-static int is_debugmode = 1;
+static int is_debugmode = 0;
 FILE *fp;
 
 
@@ -64,6 +64,11 @@ int scan(){
 			cbuf = fgetc(fp);
 			continue;
 		}
+		//文字列の場合, シングルクオートを待つ.
+		else if(cbuf == '\''){
+			while(cbuf != '\'') cbuf = fgetc(fp);
+			cbuf = fgetc(fp);
+		}
 		//英字の場合、英数字が続く限り読み込んで名前かキーワードかを判別する
 		else if(isalpha(cbuf)){
 			int i = 0;
@@ -86,7 +91,12 @@ int scan(){
 		//数字の場合、数字が続く限り読み込んで値を格納する
 		else if(isdigit(cbuf)){
 			int i = 0;
-			while(isdigit(cbuf)) string_attr[i++] = cbuf;
+			printf("isdigit.\tcbuf:%c\n", cbuf);
+			while(isdigit(cbuf)){
+				string_attr[i++] = cbuf;
+				cbuf = fgetc(fp);
+				printf("cbuf:%c\n", cbuf);
+			} 
 			num_attr = atoi(string_attr);
 			check_line();
 			return TNUMBER;
