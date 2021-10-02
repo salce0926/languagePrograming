@@ -37,19 +37,20 @@ int init_scan(char* filename){
 int scan(){
 	while(cbuf != EOF){
 	debug();
-	printf("loop.\tcbuf:%c\n", cbuf);
+	// printf("loop.\tcbuf:%c\n", cbuf);
 		//空白は読み飛ばす
 		if(isspace(cbuf)){
-			cbuf = fgetc(fp);
+			check_line();
 			continue;
 		}
 		//注釈も読み飛ばす
 		else if(cbuf == '{'){
-			while(cbuf != '}') cbuf = fgetc(fp);
+			while(cbuf != '}') check_line();
+			check_line();
 		}
 		else if(cbuf == '/'){
 			printf("comment.\tcbuf:%c\n", cbuf);
-			cbuf = fgetc(fp);
+			check_line();
 			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
 				return -1;
@@ -58,35 +59,43 @@ int scan(){
 			while(!(cbuf == '/' && skip == 1)){
 				// if(cbuf == "/" && skip == 1) break;
 				if(cbuf == '*') skip = 1;
-				cbuf = fgetc(fp);
+				check_line();
 				printf("comment2.\tcbuf:%c\n", cbuf);
 			}
-			cbuf = fgetc(fp);
+			check_line();
 			continue;
 		}
 		//文字列の場合, シングルクオートを待つ.
 		else if(cbuf == '\''){
-			while(cbuf != '\'') cbuf = fgetc(fp);
-			cbuf = fgetc(fp);
+			check_line();
+			while(cbuf != '\'') check_line();
+			check_line();
+			// printf("isstring.\tcbuf:%c\n", cbuf);
+			return TSTRING;
 		}
 		//英字の場合、英数字が続く限り読み込んで名前かキーワードかを判別する
 		else if(isalpha(cbuf)){
-			int i = 0;
+			int i;
+			for(i = 0; i < MAXSTRSIZE; i++){
+				string_attr[i] = '\0';
+			}
+			i = 0;
 			while(isalnum(cbuf)){
 			debug();
-			printf("isalpha.\tcbuf:%c\n", cbuf);
+			// printf("isalpha.\tcbuf:%c\n", cbuf);
 				string_attr[i++] = cbuf;
-				cbuf = fgetc(fp);
-				printf("cbuf:%c\n", cbuf);
+				check_line();
+				// printf("cbuf:%c\n", cbuf);
 			}
+			string_attr[i] = '\0';
+			printf("string_attr:%s\n", string_attr);
 			for(i = 0; i < KEYWORDSIZE; i++){
+				// printf("keyword:%s\n", key[i].keyword);
 				if(strcmp(string_attr, key[i].keyword) == 0){
-					check_line();
 					return key[i].keytoken;
 				}
-				check_line();
-				return TNAME;
 			}
+			return TNAME;
 		}
 		//数字の場合、数字が続く限り読み込んで値を格納する
 		else if(isdigit(cbuf)){
@@ -94,11 +103,10 @@ int scan(){
 			printf("isdigit.\tcbuf:%c\n", cbuf);
 			while(isdigit(cbuf)){
 				string_attr[i++] = cbuf;
-				cbuf = fgetc(fp);
+				check_line();
 				printf("cbuf:%c\n", cbuf);
 			} 
 			num_attr = atoi(string_attr);
-			check_line();
 			return TNUMBER;
 		}
 		//記号の判別
@@ -119,16 +127,23 @@ int scan(){
 			return TEQUAL;
 		}
 		else if(cbuf == '<'){
-			cbuf = fgetc(fp);
 			check_line();
-			if(cbuf == '>') return TNOTEQ;
-			else if(cbuf == '=') return TLEEQ;
+			if(cbuf == '>'){
+				check_line();
+				return TNOTEQ;
+			}
+			else if(cbuf == '='){
+				check_line();
+				return TLEEQ;
+			}
 			else return TLE;
 		}
 		else if(cbuf == '>'){
-			cbuf = fgetc(fp);
 			check_line();
-			if(cbuf == '=') return TGREQ;
+			if(cbuf == '='){
+				check_line();
+				return TGREQ;
+			}
 			else return TGR;
 		}
 		else if(cbuf == '('){
@@ -148,9 +163,11 @@ int scan(){
 			return TRSQPAREN;
 		}
 		else if(cbuf == ':'){
-			cbuf = fgetc(fp);
 			check_line();
-			if(cbuf == '=') return TASSIGN;
+			if(cbuf == '='){
+				check_line();
+				return TASSIGN;
+			}
 			else return TCOLON;
 		}
 		else if(cbuf == '.'){

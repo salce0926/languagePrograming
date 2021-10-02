@@ -63,6 +63,7 @@ int main(int nc, char *np[]) {
     while((token = scan()) >= 0) {
 	/* 作成する部分：トークンをカウントする */
 		numtoken[token]++;
+		printf("\t\t\t%s\n", tokenstr[token]);
     }
     end_scan();
     /* 作成する部分:カウントした結果を出力する */
