@@ -39,7 +39,7 @@ int init_scan(char* filename){
 int scan(){
 	while(cbuf != EOF){
 	debug();
-	// printf("loop.\tcbuf:%c\n", cbuf);
+	// debugPrintChar("loop.\tcbuf:", cbuf);
 		//空白は読み飛ばす
 		if(isspace(cbuf)){
 			check_line();
@@ -59,10 +59,9 @@ int scan(){
 			}
 			int skip = 0;
 			while(!(cbuf == '/' && skip == 1)){
-				// if(cbuf == "/" && skip == 1) break;
 				if(cbuf == '*') skip = 1;
 				check_line();
-				printf("comment2.\tcbuf:%c\n", cbuf);
+				debugPrintChar("comment2.\tcbuf:", cbuf);
 			}
 			check_line();
 			continue;
@@ -84,10 +83,10 @@ int scan(){
 			i = 0;
 			while(isalnum(cbuf)){
 			debug();
-			// printf("isalpha.\tcbuf:%c\n", cbuf);
+			// debugPrintChar("isalpha.\tcbuf:", cbuf);
 				string_attr[i++] = cbuf;
 				check_line();
-				// printf("cbuf:%c\n", cbuf);
+				// debugPrintChar("cbuf:", cbuf);
 			}
 			string_attr[i] = '\0';
 			printf("string_attr:%s\n", string_attr);
@@ -102,11 +101,11 @@ int scan(){
 		//数字の場合、数字が続く限り読み込んで値を格納する
 		else if(isdigit(cbuf)){
 			int i = 0;
-			printf("isdigit.\tcbuf:%c\n", cbuf);
+			debugPrintChar("isdigit.\tcbuf:", cbuf);
 			while(isdigit(cbuf)){
 				string_attr[i++] = cbuf;
 				check_line();
-				printf("cbuf:%c\n", cbuf);
+				debugPrintChar("cbuf:", cbuf);
 			} 
 			num_attr = atoi(string_attr);
 			return TNUMBER;
@@ -212,4 +211,18 @@ void debug(){
   printf("---Please press any key to continue it---");
   fgets(input, MAXSTRSIZE, stdin);
   return;
+}
+
+void debugPrintf(char *message){
+  if(!is_debugmode) return;
+  printf("%s\n", message);
+  fflush(stdout);
+  return;
+}
+
+void debugPrintChar(char *message, char c){
+	if(!is_debugmode) return;
+	printf("%s%c\n", message, c);
+	fflush(stdout);
+	return;
 }
