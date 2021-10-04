@@ -11,17 +11,29 @@ FILE *fp;
 
 int my_getc(){
 	int cbuf = fgetc(fp);
+
+	//EOFは即返却
+	if(cbuf == EOF) return -1;
+
+	//改行の判定機構
 	if(cbuf == '\r'){
 		cbuf = fgetc(fp);
 		//NAME改行NAMEなどの時に困るので, 区切っておく
 		if(cbuf == '\n') cbuf = ' ';
 		newline = 1;
+		return cbuf;
 	}
 	else if(cbuf == '\n'){
 		cbuf = fgetc(fp);
 		//NAME改行NAMEなどの時に困るので, 区切っておく
 		if(cbuf == '\r') cbuf = ' ';
 		newline = 1;
+		return cbuf;
+	}
+
+	//表示文字とタブ以外は通さない
+	if(!isprint(cbuf) && cbuf != '\t'){
+		return -1;
 	}
 	return cbuf;
 }
@@ -41,7 +53,7 @@ int scan(){
 	debug();
 	// debugPrintChar("loop.\tcbuf:", cbuf);
 		//空白は読み飛ばす
-		if(isspace(cbuf)){
+		if(cbuf == ' ' || cbuf == '\t'){
 			check_line();
 			continue;
 		}
@@ -55,8 +67,10 @@ int scan(){
 			check_line();
 			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
+				printf("unknown symbol:/\n");
 				return -1;
 			}
+			check_line();
 			int skip = 0;
 			while(!(cbuf == '/' && skip == 1)){
 				if(cbuf == '*') skip = 1;
