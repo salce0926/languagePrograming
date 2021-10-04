@@ -183,6 +183,10 @@ int scan(){
 			check_line();
 			return TSEMI;
 		}
+		else{
+			printf("unknown symbol:%c\n", cbuf);
+			return -1;
+		}
 	}
 }
 
