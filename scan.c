@@ -83,9 +83,28 @@ int scan(){
 		//文字列の場合, シングルクオートを待つ.
 		else if(cbuf == '\''){
 			check_line();
-			while(cbuf != '\'') check_line();
-			check_line();
-			// printf("isstring.\tcbuf:%c\n", cbuf);
+			int i;
+			for(i = 0; i < MAXSTRSIZE; i++){
+				string_attr[i] = '\0';
+			}
+			i = 0;
+			while(1){
+			debug();
+			// debugPrintChar("isstring.\tcbuf:", cbuf);
+				if(cbuf == '\''){
+					check_line();
+					if(cbuf == '\''){
+						string_attr[i++] = '\'';
+					}else{
+						break;
+					}
+				}
+				string_attr[i++] = cbuf;
+				check_line();
+				// debugPrintChar("cbuf:", cbuf);
+			}
+			string_attr[i] = '\0';
+			printf("string_attr:%s\n", string_attr);
 			return TSTRING;
 		}
 		//英字の場合、英数字が続く限り読み込んで名前かキーワードかを判別する
