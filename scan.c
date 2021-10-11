@@ -1,5 +1,8 @@
 #include "token-list.h"
 
+#define TOKEN 1
+#define NOTTOKEN 0
+
 int cbuf;
 int num_attr;
 char string_attr[MAXSTRSIZE];
@@ -54,35 +57,35 @@ int scan(){
 	// debugPrintChar("loop.\tcbuf:", cbuf);
 		//空白は読み飛ばす
 		if(cbuf == ' ' || cbuf == '\t'){
-			check_line();
+			check_line(NOTTOKEN);
 			continue;
 		}
 		//注釈も読み飛ばす
 		else if(cbuf == '{'){
-			while(cbuf != '}') check_line();
-			check_line();
+			while(cbuf != '}') check_line(NOTTOKEN);
+			check_line(NOTTOKEN);
 		}
 		else if(cbuf == '/'){
 			printf("comment.\tcbuf:%c\n", cbuf);
-			check_line();
+			check_line(TOKEN);
 			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
 				printf("unknown symbol:/\n");
 				return -1;
 			}
-			check_line();
+			check_line(TOKEN);
 			int skip = 0;
 			while(!(cbuf == '/' && skip == 1)){
 				if(cbuf == '*') skip = 1;
-				check_line();
+				check_line(TOKEN);
 				debugPrintChar("comment2.\tcbuf:", cbuf);
 			}
-			check_line();
+			check_line(TOKEN);
 			continue;
 		}
 		//文字列の場合, シングルクオートを待つ.
 		else if(cbuf == '\''){
-			check_line();
+			check_line(TOKEN);
 			int i;
 			for(i = 0; i < MAXSTRSIZE; i++){
 				string_attr[i] = '\0';
@@ -92,7 +95,7 @@ int scan(){
 			debug();
 			// debugPrintChar("isstring.\tcbuf:", cbuf);
 				if(cbuf == '\''){
-					check_line();
+					check_line(TOKEN);
 					if(cbuf == '\''){
 						string_attr[i++] = '\'';
 					}else{
@@ -100,7 +103,7 @@ int scan(){
 					}
 				}
 				string_attr[i++] = cbuf;
-				check_line();
+				check_line(TOKEN);
 				// debugPrintChar("cbuf:", cbuf);
 			}
 			string_attr[i] = '\0';
@@ -118,7 +121,7 @@ int scan(){
 			debug();
 			// debugPrintChar("isalpha.\tcbuf:", cbuf);
 				string_attr[i++] = cbuf;
-				check_line();
+				check_line(TOKEN);
 				// debugPrintChar("cbuf:", cbuf);
 			}
 			string_attr[i] = '\0';
@@ -137,7 +140,7 @@ int scan(){
 			debugPrintChar("isdigit.\tcbuf:", cbuf);
 			while(isdigit(cbuf)){
 				string_attr[i++] = cbuf;
-				check_line();
+				check_line(TOKEN);
 				debugPrintChar("cbuf:", cbuf);
 			} 
 			num_attr = atoi(string_attr);
@@ -145,75 +148,75 @@ int scan(){
 		}
 		//記号の判別
 		else if(cbuf == '+'){
-			check_line();
+			check_line(TOKEN);
 			return TPLUS;
 		}
 		else if(cbuf == '-'){
-			check_line();
+			check_line(TOKEN);
 			return TMINUS;
 		}
 		else if(cbuf == '*'){
-			check_line();
+			check_line(TOKEN);
 			return TSTAR;
 		}
 		else if(cbuf == '='){
-			check_line();
+			check_line(TOKEN);
 			return TEQUAL;
 		}
 		else if(cbuf == '<'){
-			check_line();
+			check_line(TOKEN);
 			if(cbuf == '>'){
-				check_line();
+				check_line(TOKEN);
 				return TNOTEQ;
 			}
 			else if(cbuf == '='){
-				check_line();
+				check_line(TOKEN);
 				return TLEEQ;
 			}
 			else return TLE;
 		}
 		else if(cbuf == '>'){
-			check_line();
+			check_line(TOKEN);
 			if(cbuf == '='){
-				check_line();
+				check_line(TOKEN);
 				return TGREQ;
 			}
 			else return TGR;
 		}
 		else if(cbuf == '('){
-			check_line();
+			check_line(TOKEN);
 			return TLPAREN;
 		}
 		else if(cbuf == ')'){
-			check_line();
+			check_line(TOKEN);
 			return TRPAREN;
 		}
 		else if(cbuf == '['){
-			check_line();
+			check_line(TOKEN);
 			return TLSQPAREN;
 		}
 		else if(cbuf == ']'){
-			check_line();
+			check_line(TOKEN);
 			return TRSQPAREN;
 		}
 		else if(cbuf == ':'){
-			check_line();
+			check_line(TOKEN);
 			if(cbuf == '='){
-				check_line();
+				check_line(TOKEN);
 				return TASSIGN;
 			}
 			else return TCOLON;
 		}
 		else if(cbuf == '.'){
-			check_line();
+			check_line(TOKEN);
 			return TDOT;
 		}
 		else if(cbuf == ','){
-			check_line();
+			check_line(TOKEN);
 			return TCOMMA;
 		}
 		else if(cbuf == ';'){
-			check_line();
+			check_line(TOKEN);
 			return TSEMI;
 		}
 		else{
@@ -232,8 +235,8 @@ void end_scan(){
 	return;
 }
 
-void check_line(){
-	if(newline == 1){
+void check_line(const int is_token){
+	if(is_token == TOKEN && newline == 1){
 		linenum++;
 		newline = 0;
 		printf("newline--------------------------------------------------\n");
