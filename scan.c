@@ -6,7 +6,8 @@
 int cbuf;
 int num_attr;
 char string_attr[MAXSTRSIZE];
-static int linenum = 0;
+static int public_linenum = 0;
+static int private_linenum = 0;
 static int newline = 1;
 static int is_debugmode = 0;
 FILE *fp;
@@ -70,7 +71,7 @@ int scan(){
 			check_line(TOKEN);
 			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
-				printf("unknown symbol:/\n");
+				printf("in line %d, unknown symbol:/\n", get_linenum());
 				return -1;
 			}
 			check_line(TOKEN);
@@ -220,24 +221,28 @@ int scan(){
 			return TSEMI;
 		}
 		else{
-			printf("unknown symbol:%c\n", cbuf);
+			printf("in line %d, unknown symbol:%c\n", get_linenum(), cbuf);
 			return -1;
 		}
 	}
 }
 
 int get_linenum(){
-    return linenum;
+    return public_linenum;
 }
 
 void end_scan(){
 	fclose(fp);
+	public_linenum = private_linenum;
 	return;
 }
 
 void check_line(const int is_token){
 	if(is_token == TOKEN && newline == 1){
-		linenum++;
+		private_linenum++;
+		if(is_token == TOKEN){
+			public_linenum = private_linenum;
+		}
 		newline = 0;
 		printf("newline--------------------------------------------------\n");
 	}
