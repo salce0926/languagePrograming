@@ -1,7 +1,9 @@
 #include "token-list.h"
 
+#define SEPARATOR 0
 #define TOKEN 1
-#define NOTTOKEN 0
+#define STRING 2
+#define COMMENT 3
 
 int cbuf;
 int num_attr;
@@ -9,15 +11,22 @@ char string_attr[MAXSTRSIZE];
 static int public_linenum = 0;
 static int private_linenum = 0;
 static int newline = 1;
+static int is_error = 0;
 static int is_debugmode = 0;
 FILE *fp;
 
 
-int my_getc(){
+int my_getc(int type){
 	int cbuf = fgetc(fp);
 
 	//EOFは即返却
-	if(cbuf == EOF) return -1;
+	if(cbuf == EOF){
+		if(type == STRING || type == COMMENT){
+			printf("parse error at end of input.\n");
+			is_error = 1;
+		}
+		return -1;
+	}
 
 	//改行の判定機構
 	if(cbuf == '\r'){
@@ -48,55 +57,59 @@ int init_scan(char* filename){
 		return -1;
 	}
 
-	cbuf = my_getc();
+	cbuf = my_getc(SEPARATOR);
 	return 0;
 }
 
 int scan(){
 	while(cbuf != EOF){
+		if(is_error == 1) return -1;
 	debug();
 	// debugPrintChar("loop.\tcbuf:", cbuf);
 		//空白は読み飛ばす
 		if(cbuf == ' ' || cbuf == '\t'){
-			check_line(NOTTOKEN);
+			check_line(SEPARATOR);
 			continue;
 		}
 		//注釈も読み飛ばす
 		else if(cbuf == '{'){
-			while(cbuf != '}') check_line(NOTTOKEN);
-			check_line(NOTTOKEN);
+			while(cbuf != '}' && cbuf >= 0) check_line(COMMENT);
+			if(cbuf < 0) return -1;
+			check_line(SEPARATOR);
 		}
 		else if(cbuf == '/'){
 			printf("comment.\tcbuf:%c\n", cbuf);
-			check_line(TOKEN);
+			check_line(COMMENT);
 			if(cbuf != '*'){
 				//注釈ではないし、symbolに"/"は存在しない
 				printf("in line %d, unknown symbol:/\n", get_linenum());
 				return -1;
 			}
-			check_line(TOKEN);
+			check_line(COMMENT);
 			int skip = 0;
 			while(!(cbuf == '/' && skip == 1)){
+				if(cbuf < 0 || is_error == 1) return -1;
 				if(cbuf == '*') skip = 1;
-				check_line(TOKEN);
+				check_line(COMMENT);
 				debugPrintChar("comment2.\tcbuf:", cbuf);
 			}
-			check_line(TOKEN);
+			check_line(SEPARATOR);
 			continue;
 		}
 		//文字列の場合, シングルクオートを待つ.
 		else if(cbuf == '\''){
-			check_line(TOKEN);
+			check_line(STRING);
 			int i;
 			for(i = 0; i < MAXSTRSIZE; i++){
 				string_attr[i] = '\0';
 			}
 			i = 0;
 			while(1){
+				if(is_error == 1) return -1;
 			debug();
 			// debugPrintChar("isstring.\tcbuf:", cbuf);
 				if(cbuf == '\''){
-					check_line(TOKEN);
+					check_line(STRING);
 					if(cbuf == '\''){
 						string_attr[i++] = '\'';
 					}else{
@@ -104,7 +117,7 @@ int scan(){
 					}
 				}
 				string_attr[i++] = cbuf;
-				check_line(TOKEN);
+				check_line(STRING);
 				// debugPrintChar("cbuf:", cbuf);
 			}
 			string_attr[i] = '\0';
@@ -145,6 +158,11 @@ int scan(){
 				debugPrintChar("cbuf:", cbuf);
 			} 
 			num_attr = atoi(string_attr);
+			if(num_attr > 32767){
+				printf("in line %d, this number is too large.\n", get_linenum());
+				printf("Note:the range of valid numbers is 0 to 32767.\n");
+				return -1;
+			}
 			return TNUMBER;
 		}
 		//記号の判別
@@ -237,16 +255,17 @@ void end_scan(){
 	return;
 }
 
-void check_line(const int is_token){
-	if(is_token == TOKEN && newline == 1){
+void check_line(const int type){
+	if(newline == 1){
 		private_linenum++;
-		if(is_token == TOKEN){
-			public_linenum = private_linenum;
-		}
+		printf("%d\n", type);
 		newline = 0;
-		printf("newline--------------------------------------------------\n");
+		printf("newline:%d(%d)--------------------------------------------------\n", public_linenum, private_linenum);
 	}
-	cbuf = my_getc();
+	if(type != SEPARATOR && type != COMMENT){
+		public_linenum = private_linenum;
+	}
+	cbuf = my_getc(type);
 	return;
 }
 
