@@ -19,7 +19,7 @@ FILE *fp;
 int my_getc(int type){
 	int cbuf = fgetc(fp);
 
-	//EOFは即返却
+	//EOF is returned immediately
 	if(cbuf == EOF){
 		if(type == STRING || type == COMMENT){
 			printf("parse error at end of input.\n");
@@ -28,23 +28,23 @@ int my_getc(int type){
 		return -1;
 	}
 
-	//改行の判定機構
+	//judging a new line
 	if(cbuf == '\r'){
 		cbuf = fgetc(fp);
-		//NAME改行NAMEなどの時に困るので, 区切っておく
+		//assume that whitespace is read ahead
 		if(cbuf == '\n') cbuf = ' ';
 		newline = 1;
 		return cbuf;
 	}
 	else if(cbuf == '\n'){
 		cbuf = fgetc(fp);
-		//NAME改行NAMEなどの時に困るので, 区切っておく
+		//assume that whitespace is read ahead
 		if(cbuf == '\r') cbuf = ' ';
 		newline = 1;
 		return cbuf;
 	}
 
-	//表示文字とタブ以外は通さない
+	//Do not pass anything but display characters and tabs
 	if(!isprint(cbuf) && cbuf != '\t'){
 		return -1;
 	}
@@ -52,7 +52,6 @@ int my_getc(int type){
 }
 
 int init_scan(char* filename){
-	// FILE *fp;
 	if((fp = fopen(filename, "r")) == NULL){
 		return -1;
 	}
@@ -66,12 +65,12 @@ int scan(){
 		if(is_error == 1) return -1;
 	debug();
 	// debugPrintChar("loop.\tcbuf:", cbuf);
-		//空白は読み飛ばす
+		//spaces are skip over
 		if(cbuf == ' ' || cbuf == '\t'){
 			check_line(SEPARATOR);
 			continue;
 		}
-		//注釈も読み飛ばす
+		//skip the annotations too
 		else if(cbuf == '{'){
 			while(cbuf != '}' && cbuf >= 0) check_line(COMMENT);
 			if(cbuf < 0) return -1;
@@ -81,7 +80,7 @@ int scan(){
 			printf("comment.\tcbuf:%c\n", cbuf);
 			check_line(COMMENT);
 			if(cbuf != '*'){
-				//注釈ではないし、symbolに"/"は存在しない
+				//it's not an annotation and "/" is not a symbol
 				printf("in line %d, unknown symbol:/\n", get_linenum());
 				return -1;
 			}
@@ -96,7 +95,7 @@ int scan(){
 			check_line(SEPARATOR);
 			continue;
 		}
-		//文字列の場合, シングルクオートを待つ.
+		//for strings, wait for single quote
 		else if(cbuf == '\''){
 			check_line(STRING);
 			int i;
@@ -124,7 +123,7 @@ int scan(){
 			printf("string_attr:%s\n", string_attr);
 			return TSTRING;
 		}
-		//英字の場合、英数字が続く限り読み込んで名前かキーワードかを判別する
+		//for alphabets, read as long as the letter or number follows
 		else if(isalpha(cbuf)){
 			int i;
 			for(i = 0; i < MAXSTRSIZE; i++){
@@ -153,7 +152,7 @@ int scan(){
 			}
 			return TNAME;
 		}
-		//数字の場合、数字が続く限り読み込んで値を格納する
+		//for numbers, read as long as the number follows
 		else if(isdigit(cbuf)){
 			int i = 0;
 			debugPrintChar("isdigit.\tcbuf:", cbuf);
@@ -170,7 +169,7 @@ int scan(){
 			}
 			return TNUMBER;
 		}
-		//記号の判別
+		//the case of a symbol
 		else if(cbuf == '+'){
 			check_line(TOKEN);
 			return TPLUS;
