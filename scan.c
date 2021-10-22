@@ -138,6 +138,11 @@ int scan(){
 				check_line(TOKEN);
 				// debugPrintChar("cbuf:", cbuf);
 			}
+			if(i > MAXSTRSIZE){
+				printf("in line %d, this string is too long.\n", get_linenum());
+				printf("Note:the length of valid string is up to %d.\n", MAXSTRSIZE);
+				return -1;
+			}
 			string_attr[i] = '\0';
 			printf("string_attr:%s\n", string_attr);
 			for(i = 0; i < KEYWORDSIZE; i++){
@@ -158,7 +163,7 @@ int scan(){
 				debugPrintChar("cbuf:", cbuf);
 			} 
 			num_attr = atoi(string_attr);
-			if(num_attr > 32767){
+			if(num_attr > 32767 || i > 5){
 				printf("in line %d, this number is too large.\n", get_linenum());
 				printf("Note:the range of valid numbers is 0 to 32767.\n");
 				return -1;
