@@ -56,24 +56,17 @@ int main(int nc, char *np[]) {
 	printf("File %s can not open.\n", np[1]);
 	return 0;
     }
-    /* 作成する部分：トークンカウント用の配列？を初期化する */
 	for(i = 1; i <= NUMOFTOKEN; i++){
 		numtoken[i] = 0;
 	}
     while((token = scan()) >= 0) {
-	/* 作成する部分：トークンをカウントする */
 		numtoken[token]++;
-		printf("\t\t\t%s\n", tokenstr[token]);
     }
     end_scan();
-    /* 作成する部分:カウントした結果を出力する */
-	printf("~~~~~result~~~~~\n");
 	for(i = 1; i <= NUMOFTOKEN; i++){
 		if(numtoken[i] == 0) continue;
-		printf("\"%s\"\t%d\n", tokenstr[i], numtoken[i]);
+		printf("\"%s\t\"\t%d\n", tokenstr[i], numtoken[i]);
 	}
-	printf("number of line:%d\n", get_linenum());
-	printf("~~~~~~~~~~~~~~~~\n");
     return 0;
 }
 

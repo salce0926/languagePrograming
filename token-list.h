@@ -79,6 +79,3 @@ extern char string_attr[MAXSTRSIZE];
 extern int get_linenum(void);
 extern void end_scan(void);
 extern void check_line(int is_token);
-extern void debug(void);
-extern void debugPrintf(char *message);
-extern void debugPrintChar(char *message, char c);

@@ -63,8 +63,6 @@ int init_scan(char* filename){
 int scan(){
 	while(cbuf != EOF){
 		if(is_error == 1) return -1;
-	debug();
-	// debugPrintChar("loop.\tcbuf:", cbuf);
 		//spaces are skip over
 		if(cbuf == ' ' || cbuf == '\t'){
 			check_line(SEPARATOR);
@@ -77,7 +75,6 @@ int scan(){
 			check_line(SEPARATOR);
 		}
 		else if(cbuf == '/'){
-			printf("comment.\tcbuf:%c\n", cbuf);
 			check_line(COMMENT);
 			if(cbuf != '*'){
 				//it's not an annotation and "/" is not a symbol
@@ -90,7 +87,6 @@ int scan(){
 				if(cbuf < 0 || is_error == 1) return -1;
 				if(cbuf == '*') skip = 1;
 				check_line(COMMENT);
-				debugPrintChar("comment2.\tcbuf:", cbuf);
 			}
 			check_line(SEPARATOR);
 			continue;
@@ -105,8 +101,6 @@ int scan(){
 			i = 0;
 			while(1){
 				if(is_error == 1) return -1;
-			debug();
-			// debugPrintChar("isstring.\tcbuf:", cbuf);
 				if(cbuf == '\''){
 					check_line(STRING);
 					if(cbuf == '\''){
@@ -117,10 +111,8 @@ int scan(){
 				}
 				string_attr[i++] = cbuf;
 				check_line(STRING);
-				// debugPrintChar("cbuf:", cbuf);
 			}
 			string_attr[i] = '\0';
-			printf("string_attr:%s\n", string_attr);
 			return TSTRING;
 		}
 		//for alphabets, read as long as the letter or number follows
@@ -131,11 +123,8 @@ int scan(){
 			}
 			i = 0;
 			while(isalnum(cbuf)){
-			debug();
-			// debugPrintChar("isalpha.\tcbuf:", cbuf);
 				string_attr[i++] = cbuf;
 				check_line(TOKEN);
-				// debugPrintChar("cbuf:", cbuf);
 			}
 			if(i > MAXSTRSIZE){
 				printf("in line %d, this string is too long.\n", get_linenum());
@@ -143,9 +132,7 @@ int scan(){
 				return -1;
 			}
 			string_attr[i] = '\0';
-			printf("string_attr:%s\n", string_attr);
 			for(i = 0; i < KEYWORDSIZE; i++){
-				// printf("keyword:%s\n", key[i].keyword);
 				if(strcmp(string_attr, key[i].keyword) == 0){
 					return key[i].keytoken;
 				}
@@ -155,11 +142,9 @@ int scan(){
 		//for numbers, read as long as the number follows
 		else if(isdigit(cbuf)){
 			int i = 0;
-			debugPrintChar("isdigit.\tcbuf:", cbuf);
 			while(isdigit(cbuf)){
 				string_attr[i++] = cbuf;
 				check_line(TOKEN);
-				debugPrintChar("cbuf:", cbuf);
 			} 
 			num_attr = atoi(string_attr);
 			if(num_attr > 32767 || i > 5){
@@ -262,35 +247,11 @@ void end_scan(){
 void check_line(const int type){
 	if(newline == 1){
 		private_linenum++;
-		printf("%d\n", type);
 		newline = 0;
-		printf("newline:%d(%d)--------------------------------------------------\n", public_linenum, private_linenum);
 	}
 	if(type != SEPARATOR && type != COMMENT){
 		public_linenum = private_linenum;
 	}
 	cbuf = my_getc(type);
-	return;
-}
-
-void debug(){
-  if(!is_debugmode) return;
-  char input[MAXSTRSIZE];
-  printf("---Please press any key to continue it---");
-  fgets(input, MAXSTRSIZE, stdin);
-  return;
-}
-
-void debugPrintf(char *message){
-  if(!is_debugmode) return;
-  printf("%s\n", message);
-  fflush(stdout);
-  return;
-}
-
-void debugPrintChar(char *message, char c){
-	if(!is_debugmode) return;
-	printf("%s%c\n", message, c);
-	fflush(stdout);
 	return;
 }
