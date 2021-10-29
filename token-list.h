@@ -68,7 +68,7 @@ extern struct KEY {
 	int keytoken;
 } key[KEYWORDSIZE];
 
-extern void error(char *mes);
+extern void scan_error(char *mes);
 
 /* scan.c */
 extern int init_scan(char *filename);
@@ -79,3 +79,40 @@ extern char string_attr[MAXSTRSIZE];
 extern int get_linenum(void);
 extern void end_scan(void);
 extern void check_line(int is_token);
+
+/* parse.c */
+extern void init_parse();
+extern int parse_program();
+extern int block();
+extern int variable_declaration();
+extern int variable_names();
+extern int variable_name();
+extern int type();
+extern int standard_type();
+extern int array_type();
+extern int subprogram_declaration();
+extern int procedure_name();
+extern int formal_parameters();
+extern int compound_statement();
+extern int statement();
+extern int condition_statement();
+extern int iteration_statement();
+extern int exit_statement();
+extern int call_statement();
+extern int expressions();
+extern int return_statement();
+extern int assignment_statement();
+extern int left_part();
+extern int variabble();
+extern int expression();
+extern int simple_expression();
+extern int term();
+extern int factor();
+extern int constant();
+extern int multiplicative_operator();
+extern int additive_operator();
+extern int relational_operator();
+extern int input_statement();
+extern int output_statement();
+extern int output_format();
+extern int empty_statement();
