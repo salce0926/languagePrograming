@@ -81,6 +81,7 @@ extern void end_scan(void);
 extern void check_line(int is_token);
 
 /* parse.c */
+extern int token;
 extern void init_parse();
 extern int parse_program();
 extern int block();
@@ -103,7 +104,7 @@ extern int expressions();
 extern int return_statement();
 extern int assignment_statement();
 extern int left_part();
-extern int variabble();
+extern int variable();
 extern int expression();
 extern int simple_expression();
 extern int term();
@@ -116,3 +117,8 @@ extern int input_statement();
 extern int output_statement();
 extern int output_format();
 extern int empty_statement();
+extern int error();
+
+extern void debug();
+extern void debugPrintf(char *);
+extern void debugPrintChar(char *, char);

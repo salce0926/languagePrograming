@@ -1,11 +1,11 @@
 #
 # Makefile for LP
 #
-OBJS=token-list.o id-list.o scan.o
+OBJS=token-list.o id-list.o scan.o parse.o
 
-all: scan
+all: parse
 
-scan: ${OBJS}
+parse: ${OBJS}
 	${CC} -o $@ $^
 
 clean:
