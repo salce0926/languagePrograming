@@ -119,6 +119,7 @@ extern int output_format();
 extern int empty_statement();
 extern void println();
 extern int error();
+extern void prettyPrint(int);
 
 extern void debug();
 extern void debugPrintf(char *);

@@ -4,9 +4,10 @@
 #define ERROR 1
 
 #define CALL(function) if(function == ERROR) return(ERROR)
-#define JUDGE(code, string) if(token != code) return(error(string));printf("%s ", (token == TNAME ? string_attr : tokenstr[token]));token = scan()
+#define JUDGE(code, string) if(token != code) return(error(string));prettyPrint(token);token = scan()
 
 int token;
+static int is_line_head = 1;
 static int indent_count = 0;
 static int in_while = 0;
 static int is_debugmode = 0;
@@ -20,7 +21,6 @@ int parse_program() {
     JUDGE(TPROGRAM, "Keyword 'program' is not found");
     JUDGE(TNAME, "Program name is not found");
     JUDGE(TSEMI, "Semicolon is not found");
-    println();
     CALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
     return(NORMAL);
@@ -40,18 +40,17 @@ int block(){
 int variable_declaration(){
     debug();
     debugPrintf("variable_declaration\n");
+    indent_count = 1;
     JUDGE(TVAR, "Keyword 'var' is not found");
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     CALL(type());
     JUDGE(TSEMI, "Semicolon is not found");
-    println();
     while(token == TNAME){
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(type());
         JUDGE(TSEMI, "Semicolon is not found");
-        println();
     }
     return(NORMAL);
 }
@@ -91,8 +90,13 @@ int standard_type(){
     debug();
     debugPrintf("standard_type\n");
     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TINTEGER){
+            JUDGE(TINTEGER, "Keyword 'integer' is not found");
+        }else if(token == TBOOLEAN){
+            JUDGE(TBOOLEAN, "Keyword 'boolean' is not found");
+        }else if(token == TCHAR){
+            JUDGE(TCHAR, "Keyword 'char' is not found");
+        }
     }
     else return(error("Standard type is not found"));
     return(NORMAL);
@@ -113,15 +117,15 @@ int array_type(){
 int subprogram_declaration(){
     debug();
     debugPrintf("subprogram_declaration\n");
+    indent_count = 1;
     JUDGE(TPROCEDURE, "Keyword 'procedure' is not found");
     CALL(procedure_name());
     if(token == TLPAREN) CALL(formal_parameters());
     JUDGE(TSEMI, "Semicolon is not found");
-    println();
     if(token == TVAR) CALL(variable_declaration());
+    indent_count = 1;
     CALL(compound_statement());
     JUDGE(TSEMI, "Semicolon is not found");
-    println();
     return(NORMAL);
 }
 
@@ -141,7 +145,6 @@ int formal_parameters(){
     CALL(type());
     while(token == TSEMI){
         JUDGE(TSEMI, "Semicolon is not found");
-        println();
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(type());
@@ -155,16 +158,13 @@ int compound_statement(){
     debugPrintf("compound_statement\n");
     JUDGE(TBEGIN, "Keyword 'begin' is not found");
     indent_count++;
-    println();
     CALL(statement());
     while(token == TSEMI){
         JUDGE(TSEMI, "Semicolon is not found");
-        println();
         CALL(statement());
     }
     debug();
     indent_count--;
-    println();
     JUDGE(TEND, "Keyword 'end' is not found");
     return(NORMAL);
 }
@@ -219,7 +219,6 @@ int condition_statement(){
     JUDGE(TTHEN, "Keyword 'then' is not found");
     CALL(statement());
     if(token != TELSE) return(NORMAL);
-    println();
     JUDGE(TELSE, "Keyword 'else' is not found");
     CALL(statement());
     return(NORMAL);
@@ -316,7 +315,13 @@ int expression(){
 int simple_expression(){
     debug();
     debugPrintf("simple_expresssion\n");
-    if(token == TPLUS || token == TMINUS) token = scan();
+    if(token == TPLUS || token == TMINUS){
+        if(token == TPLUS){
+            JUDGE(TPLUS, "'+' is not found");
+        }else if(token == TMINUS){
+            JUDGE(TMINUS, "'-' is not found");
+        }
+    }
     CALL(term());
     while(token == TPLUS || token == TMINUS || token == TOR){
         CALL(additive_operator());
@@ -368,13 +373,14 @@ int constant(){
     debugPrintf("constant\n");
     if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         if(token == TNUMBER){
-            printf("%s ", string_attr);
+            JUDGE(TNUMBER, "Number is not found");
+        }else if(token == TFALSE){
+            JUDGE(TFALSE, "Keyword 'false' is not found");
+        }else if(token == TTRUE){
+            JUDGE(TTRUE, "Keyword 'true' is not found");
         }else if(token == TSTRING){
-            printf("'%s' ", string_attr);
-        }else{
-            printf("%s ", tokenstr[token]);
+            JUDGE(TSTRING, "String is not found");
         }
-        token = scan();
     }
     else return(ERROR);
     return(NORMAL);
@@ -384,8 +390,13 @@ int multiplicative_operator(){
     debug();
     debugPrintf("multiplicative_operator\n");
     if(token == TSTAR || token == TDIV || token == TAND){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TSTAR){
+            JUDGE(TSTAR, "'*' is not found");
+        }else if(token == TDIV){
+            JUDGE(TDIV, "Keyword 'div' is not found");
+        }else if(token == TAND){
+            JUDGE(TAND, "Keyword 'and' is not found");
+        }
     }
     else return(ERROR);
     return(NORMAL);
@@ -395,8 +406,13 @@ int additive_operator(){
     debug();
     debugPrintf("additive_operator\n");
     if(token == TPLUS || token == TMINUS || token == TOR){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TPLUS){
+            JUDGE(TPLUS, "'+' is not found");
+        }else if(token == TMINUS){
+            JUDGE(TMINUS, "'-' is not found");
+        }else if(token == TOR){
+            JUDGE(TOR, "Keyword 'or' is not found");
+        }
     }
     else return(ERROR);
     return(NORMAL);
@@ -406,8 +422,19 @@ int relational_operator(){
     debug();
     debugPrintf("relational_operator\n");
     if(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ ||token == TGR || token == TGREQ){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TEQUAL){
+            JUDGE(TEQUAL, "'=' is not found");
+        }else if(token == TNOTEQ){
+            JUDGE(TNOTEQ, "'<>' is not found");
+        }else if(token == TLE){
+            JUDGE(TLE, "'<' is not found");
+        }else if(token == TLEEQ){
+            JUDGE(TLEEQ, "'<=' is not found");
+        }else if(token == TGR){
+            JUDGE(TGR, "'>' is not found");
+        }else if(token == TGREQ){
+            JUDGE(TGREQ, "'>=' is not found");
+        }
     }
     else return(ERROR);
     return(NORMAL);
@@ -417,8 +444,11 @@ int input_statement(){
     debug();
     debugPrintf("input_statement\n");
     if(token == TREAD || token == TREADLN){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TREAD){
+            JUDGE(TREAD, "Keyword 'read' is not found");
+        }else if(token == TREADLN){
+            JUDGE(TREADLN, "Keyword 'readln' is not found");
+        }
     }
     else return(ERROR);
     if(token != TLPAREN) return(NORMAL);
@@ -436,8 +466,11 @@ int output_statement(){
     debug();
     debugPrintf("output_statement\n");
     if(token == TWRITE || token == TWRITELN){
-        printf("%s ", tokenstr[token]);
-        token = scan();
+        if(token == TWRITE){
+            JUDGE(TWRITE, "Keyword 'write' is not found");
+        }else if(token == TWRITELN){
+            JUDGE(TWRITELN, "Keyword 'writeln' is not found");
+        }
     }
     else return(ERROR);
     if(token != TLPAREN) return(NORMAL);
@@ -466,7 +499,7 @@ int empty_statement(){
     debugPrintf("empty_statement\n");
     return(NORMAL);
 }
-
+/*
 void println(){
     int i;
     printf("\n");
@@ -474,11 +507,42 @@ void println(){
         printf("    ");
     }
 }
+*/
+
+void prettyPrint(int token){
+    int i;
+    /*TODO:行番号出力したい
+     *     引数が大域変数なので消して良い */
+    if(!is_line_head && (token == TBEGIN || token == TEND || token == TELSE)){
+        printf("\n");
+        is_line_head = 1;
+    }
+    if(is_line_head){
+        for(i = 0; i < indent_count; i++){
+            printf("    ");
+        }
+    }else if(token != TSEMI && token != TCOMMA){
+        printf(" ");
+    }
+
+    if(token == TSTRING){
+        printf("'%s'", string_attr);
+    }else if(token == TNAME || token == TNUMBER){
+        printf("%s", string_attr);
+    }else{
+        printf("%s", tokenstr[token]);
+    }
+    is_line_head = 0;
+
+    if(token == TSEMI || token == TBEGIN){
+        printf("\n");
+        is_line_head = 1;
+    }
+}
 /*TODO:return(ERRER)はありえない(必ずerror(mes)でメッセージを出力)
- *     動くかは試したい
  *     行数をエラー時に表示させる必要がある
  *     sample13のthenでの改行
- *     ;の後のendで二段になってしまう
+ *     sample026で00が通ってしまう
  * */
 
 int error(char *mes){
