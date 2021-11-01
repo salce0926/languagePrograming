@@ -71,7 +71,7 @@ int main(int nc, char *np[]) {
 	}
 	*/
 	token = scan();
-	if(parse_program() == 0) printf("NORMAL\n");
+	parse_program();
     return 0;
 }
 

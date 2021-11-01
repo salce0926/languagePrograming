@@ -117,6 +117,7 @@ extern int input_statement();
 extern int output_statement();
 extern int output_format();
 extern int empty_statement();
+extern void println();
 extern int error();
 
 extern void debug();
