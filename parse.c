@@ -500,15 +500,6 @@ int empty_statement(){
     debugPrintf("empty_statement\n");
     return(NORMAL);
 }
-/*
-void println(){
-    int i;
-    printf("\n");
-    for(i = 0; i < indent_count; i++){
-        printf("    ");
-    }
-}
-*/
 
 void prettyPrint(int token){
     int i;
