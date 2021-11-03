@@ -527,7 +527,10 @@ void prettyPrint(int token){
 
     if(token == TSTRING){
         printf("'%s'", string_attr);
-    }else if(token == TNAME || token == TNUMBER){
+    }else if(token == TNAME){
+        printf("%s", string_attr);
+    }else if(token == TNUMBER){
+        sprintf(string_attr, "%d", num_attr);
         printf("%s", string_attr);
     }else{
         printf("%s", tokenstr[token]);
