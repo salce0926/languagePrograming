@@ -33,6 +33,7 @@ int block(){
         if(token == TVAR) CALL(variable_declaration());
         if(token == TPROCEDURE) CALL(subprogram_declaration());
     }
+    indent_count = 0;
     CALL(compound_statement());
     return(NORMAL);
 }
