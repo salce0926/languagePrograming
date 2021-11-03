@@ -521,7 +521,7 @@ void prettyPrint(int token){
         for(i = 0; i < indent_count; i++){
             printf("    ");
         }
-    }else if(token != TSEMI && token != TCOMMA){
+    }else if(token != TSEMI && token != TCOMMA && token != TDOT){
         printf(" ");
     }
 
