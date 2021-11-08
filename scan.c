@@ -253,5 +253,6 @@ void check_line(const int type){
 		public_linenum = private_linenum;
 	}
 	cbuf = my_getc(type);
+	if(cbuf == '\r' || cbuf == '\n') check_line(type);
 	return;
 }
