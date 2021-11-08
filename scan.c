@@ -12,7 +12,6 @@ static int public_linenum = 0;
 static int private_linenum = 0;
 static int newline = 1;
 static int is_error = 0;
-static int is_debugmode = 0;
 FILE *fp;
 
 
@@ -257,5 +256,6 @@ void check_line(const int type){
 		public_linenum = private_linenum;
 	}
 	cbuf = my_getc(type);
+	if(cbuf == '\r' || cbuf == '\n') check_line(type);
 	return;
 }
