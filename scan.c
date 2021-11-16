@@ -11,6 +11,7 @@ char string_attr[MAXSTRSIZE];
 static int public_linenum = 0;
 static int private_linenum = 0;
 static int newline = 1;
+static int pre_cbuf = 0;
 static int is_error = 0;
 FILE *fp;
 
@@ -29,18 +30,29 @@ int my_getc(int type){
 
 	/*judging a new line*/
 	if(cbuf == '\r'){
-		cbuf = fgetc(fp);
 		/*assume that whitespace is read ahead*/
-		if(cbuf == '\n') cbuf = ' ';
+		cbuf = ' ';
+		if(pre_cbuf == '\n') {
+			pre_cbuf = 0;
+			return cbuf;
+		}
+		pre_cbuf = '\r';
 		newline = 1;
 		return cbuf;
 	}
 	else if(cbuf == '\n'){
-		cbuf = fgetc(fp);
+		cbuf = ' ';
 		/*assume that whitespace is read ahead*/
-		if(cbuf == '\r') cbuf = ' ';
+		if(cbuf == '\r'){
+			pre_cbuf = 0;
+			return cbuf;
+		}
+		pre_cbuf = '\n';
 		newline = 1;
 		return cbuf;
+	}
+	else{
+		pre_cbuf = 0;
 	}
 
 	/*Do not pass anything but display characters and tabs*/
@@ -256,6 +268,5 @@ void check_line(const int type){
 		public_linenum = private_linenum;
 	}
 	cbuf = my_getc(type);
-	if(cbuf == '\r' || cbuf == '\n') check_line(type);
 	return;
 }

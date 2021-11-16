@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">346</td>
+            <td class="headerCovTableEntry">350</td>
             <td class="headerCovTableEntry">408</td>
-            <td class="headerCovTableEntryMed">84.8 %</td>
+            <td class="headerCovTableEntryMed">85.8 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2021-11-07 14:44:47</td>
+            <td class="headerValue">2021-11-15 18:42:17</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">35</td>
@@ -118,43 +118,43 @@
 <a name="56"><span class="lineNum">      56 </span><span class="lineCov">         12 :     return(NORMAL);</span></a>
 <a name="57"><span class="lineNum">      57 </span>            : }</a>
 <a name="58"><span class="lineNum">      58 </span>            : </a>
-<a name="59"><span class="lineNum">      59 </span><span class="lineCov">         25 : int variable_names(){</span></a>
-<a name="60"><span class="lineNum">      60 </span><span class="lineCov">         25 :     debug();</span></a>
-<a name="61"><span class="lineNum">      61 </span><span class="lineCov">         25 :     debugPrintf(&quot;variable_names\n&quot;);</span></a>
-<a name="62"><span class="lineNum">      62 </span><span class="lineCov">         25 :     CALL(variable_name());</span></a>
-<a name="63"><span class="lineNum">      63 </span><span class="lineCov">         86 :     while(token == TCOMMA){</span></a>
-<a name="64"><span class="lineNum">      64 </span><span class="lineCov">         36 :         JUDGE(TCOMMA, &quot;Comma is not found&quot;);</span></a>
-<a name="65"><span class="lineNum">      65 </span><span class="lineCov">         36 :         CALL(variable_name());</span></a>
+<a name="59"><span class="lineNum">      59 </span><span class="lineCov">         26 : int variable_names(){</span></a>
+<a name="60"><span class="lineNum">      60 </span><span class="lineCov">         26 :     debug();</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineCov">         26 :     debugPrintf(&quot;variable_names\n&quot;);</span></a>
+<a name="62"><span class="lineNum">      62 </span><span class="lineCov">         26 :     CALL(variable_name());</span></a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineCov">         91 :     while(token == TCOMMA){</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineCov">         39 :         JUDGE(TCOMMA, &quot;Comma is not found&quot;);</span></a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineCov">         39 :         CALL(variable_name());</span></a>
 <a name="66"><span class="lineNum">      66 </span>            :     }</a>
-<a name="67"><span class="lineNum">      67 </span><span class="lineCov">         25 :     return(NORMAL);</span></a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineCov">         26 :     return(NORMAL);</span></a>
 <a name="68"><span class="lineNum">      68 </span>            : }</a>
 <a name="69"><span class="lineNum">      69 </span>            : </a>
-<a name="70"><span class="lineNum">      70 </span><span class="lineCov">        231 : int variable_name(){</span></a>
-<a name="71"><span class="lineNum">      71 </span><span class="lineCov">        231 :     debug();</span></a>
-<a name="72"><span class="lineNum">      72 </span><span class="lineCov">        231 :     debugPrintf(&quot;variable_name\n&quot;);</span></a>
-<a name="73"><span class="lineNum">      73 </span><span class="lineCov">        231 :     JUDGE(TNAME, &quot;Variable name is not found&quot;);</span></a>
-<a name="74"><span class="lineNum">      74 </span><span class="lineCov">        231 :     return(NORMAL);</span></a>
+<a name="70"><span class="lineNum">      70 </span><span class="lineCov">        235 : int variable_name(){</span></a>
+<a name="71"><span class="lineNum">      71 </span><span class="lineCov">        235 :     debug();</span></a>
+<a name="72"><span class="lineNum">      72 </span><span class="lineCov">        235 :     debugPrintf(&quot;variable_name\n&quot;);</span></a>
+<a name="73"><span class="lineNum">      73 </span><span class="lineCov">        235 :     JUDGE(TNAME, &quot;Variable name is not found&quot;);</span></a>
+<a name="74"><span class="lineNum">      74 </span><span class="lineCov">        235 :     return(NORMAL);</span></a>
 <a name="75"><span class="lineNum">      75 </span>            : }</a>
 <a name="76"><span class="lineNum">      76 </span>            : </a>
-<a name="77"><span class="lineNum">      77 </span><span class="lineCov">         25 : int type(){</span></a>
-<a name="78"><span class="lineNum">      78 </span><span class="lineCov">         25 :     debug();</span></a>
-<a name="79"><span class="lineNum">      79 </span><span class="lineCov">         25 :     debugPrintf(&quot;type\n&quot;);</span></a>
-<a name="80"><span class="lineNum">      80 </span><span class="lineCov">         25 :     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){</span></a>
-<a name="81"><span class="lineNum">      81 </span><span class="lineCov">         23 :         CALL(standard_type());</span></a>
+<a name="77"><span class="lineNum">      77 </span><span class="lineCov">         26 : int type(){</span></a>
+<a name="78"><span class="lineNum">      78 </span><span class="lineCov">         26 :     debug();</span></a>
+<a name="79"><span class="lineNum">      79 </span><span class="lineCov">         26 :     debugPrintf(&quot;type\n&quot;);</span></a>
+<a name="80"><span class="lineNum">      80 </span><span class="lineCov">         26 :     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){</span></a>
+<a name="81"><span class="lineNum">      81 </span><span class="lineCov">         24 :         CALL(standard_type());</span></a>
 <a name="82"><span class="lineNum">      82 </span>            :     }</a>
 <a name="83"><span class="lineNum">      83 </span><span class="lineCov">          2 :     else if(token == TARRAY){</span></a>
 <a name="84"><span class="lineNum">      84 </span><span class="lineCov">          2 :         CALL(array_type());</span></a>
 <a name="85"><span class="lineNum">      85 </span>            :     }</a>
 <a name="86"><span class="lineNum">      86 </span><span class="lineNoCov">          0 :     else return(ERROR);</span></a>
-<a name="87"><span class="lineNum">      87 </span><span class="lineCov">         25 :     return(NORMAL);</span></a>
+<a name="87"><span class="lineNum">      87 </span><span class="lineCov">         26 :     return(NORMAL);</span></a>
 <a name="88"><span class="lineNum">      88 </span>            : }</a>
 <a name="89"><span class="lineNum">      89 </span>            : </a>
-<a name="90"><span class="lineNum">      90 </span><span class="lineCov">         25 : int standard_type(){</span></a>
-<a name="91"><span class="lineNum">      91 </span><span class="lineCov">         25 :     debug();</span></a>
-<a name="92"><span class="lineNum">      92 </span><span class="lineCov">         25 :     debugPrintf(&quot;standard_type\n&quot;);</span></a>
-<a name="93"><span class="lineNum">      93 </span><span class="lineCov">         25 :     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){</span></a>
-<a name="94"><span class="lineNum">      94 </span><span class="lineCov">         50 :         if(token == TINTEGER){</span></a>
-<a name="95"><span class="lineNum">      95 </span><span class="lineCov">         20 :             JUDGE(TINTEGER, &quot;Keyword 'integer' is not found&quot;);</span></a>
+<a name="90"><span class="lineNum">      90 </span><span class="lineCov">         26 : int standard_type(){</span></a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineCov">         26 :     debug();</span></a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineCov">         26 :     debugPrintf(&quot;standard_type\n&quot;);</span></a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineCov">         26 :     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){</span></a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineCov">         52 :         if(token == TINTEGER){</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineCov">         21 :             JUDGE(TINTEGER, &quot;Keyword 'integer' is not found&quot;);</span></a>
 <a name="96"><span class="lineNum">      96 </span><span class="lineCov">          5 :         }else if(token == TBOOLEAN){</span></a>
 <a name="97"><span class="lineNum">      97 </span><span class="lineCov">          1 :             JUDGE(TBOOLEAN, &quot;Keyword 'boolean' is not found&quot;);</span></a>
 <a name="98"><span class="lineNum">      98 </span><span class="lineCov">          4 :         }else if(token == TCHAR){</span></a>
@@ -162,7 +162,7 @@
 <a name="100"><span class="lineNum">     100 </span>            :         }</a>
 <a name="101"><span class="lineNum">     101 </span>            :     }</a>
 <a name="102"><span class="lineNum">     102 </span><span class="lineNoCov">          0 :     else return(error(&quot;Standard type is not found&quot;));</span></a>
-<a name="103"><span class="lineNum">     103 </span><span class="lineCov">         25 :     return(NORMAL);</span></a>
+<a name="103"><span class="lineNum">     103 </span><span class="lineCov">         26 :     return(NORMAL);</span></a>
 <a name="104"><span class="lineNum">     104 </span>            : }</a>
 <a name="105"><span class="lineNum">     105 </span>            : </a>
 <a name="106"><span class="lineNum">     106 </span><span class="lineCov">          2 : int array_type(){</span></a>
@@ -206,11 +206,11 @@
 <a name="144"><span class="lineNum">     144 </span><span class="lineCov">         11 :     CALL(variable_names());</span></a>
 <a name="145"><span class="lineNum">     145 </span><span class="lineCov">         11 :     JUDGE(TCOLON, &quot;Colon is not found&quot;);</span></a>
 <a name="146"><span class="lineNum">     146 </span><span class="lineCov">         11 :     CALL(type());</span></a>
-<a name="147"><span class="lineNum">     147 </span><span class="lineCov">         22 :     while(token == TSEMI){</span></a>
-<a name="148"><span class="lineNum">     148 </span><span class="lineNoCov">          0 :         JUDGE(TSEMI, &quot;Semicolon is not found&quot;);</span></a>
-<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :         CALL(variable_names());</span></a>
-<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :         JUDGE(TCOLON, &quot;Colon is not found&quot;);</span></a>
-<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 :         CALL(type());</span></a>
+<a name="147"><span class="lineNum">     147 </span><span class="lineCov">         23 :     while(token == TSEMI){</span></a>
+<a name="148"><span class="lineNum">     148 </span><span class="lineCov">          1 :         JUDGE(TSEMI, &quot;Semicolon is not found&quot;);</span></a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineCov">          1 :         CALL(variable_names());</span></a>
+<a name="150"><span class="lineNum">     150 </span><span class="lineCov">          1 :         JUDGE(TCOLON, &quot;Colon is not found&quot;);</span></a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineCov">          1 :         CALL(type());</span></a>
 <a name="152"><span class="lineNum">     152 </span>            :     }</a>
 <a name="153"><span class="lineNum">     153 </span><span class="lineCov">         11 :     JUDGE(TRPAREN, &quot;')' is not found&quot;);</span></a>
 <a name="154"><span class="lineNum">     154 </span><span class="lineCov">         11 :     return(NORMAL);</span></a>
@@ -563,39 +563,39 @@
 <a name="501"><span class="lineNum">     501 </span><span class="lineNoCov">          0 :     return(NORMAL);</span></a>
 <a name="502"><span class="lineNum">     502 </span>            : }</a>
 <a name="503"><span class="lineNum">     503 </span>            : </a>
-<a name="504"><span class="lineNum">     504 </span><span class="lineCov">        901 : void prettyPrint(int token){</span></a>
+<a name="504"><span class="lineNum">     504 </span><span class="lineCov">        911 : void prettyPrint(int token){</span></a>
 <a name="505"><span class="lineNum">     505 </span>            :     int i;</a>
 <a name="506"><span class="lineNum">     506 </span>            :     /*TODO:行番号出力したい</a>
 <a name="507"><span class="lineNum">     507 </span>            :      *     引数が大域変数なので消して良い */</a>
-<a name="508"><span class="lineNum">     508 </span><span class="lineCov">        901 :     if(!is_line_head &amp;&amp; (token == TBEGIN || token == TEND || token == TELSE)){</span></a>
+<a name="508"><span class="lineNum">     508 </span><span class="lineCov">        911 :     if(!is_line_head &amp;&amp; (token == TBEGIN || token == TEND || token == TELSE)){</span></a>
 <a name="509"><span class="lineNum">     509 </span><span class="lineCov">         44 :         printf(&quot;\n&quot;);</span></a>
 <a name="510"><span class="lineNum">     510 </span><span class="lineCov">         44 :         is_line_head = 1;</span></a>
 <a name="511"><span class="lineNum">     511 </span>            :     }</a>
-<a name="512"><span class="lineNum">     512 </span><span class="lineCov">        901 :     if(is_line_head){</span></a>
-<a name="513"><span class="lineNum">     513 </span><span class="lineCov">        419 :         for(i = 0; i &lt; indent_count; i++){</span></a>
-<a name="514"><span class="lineNum">     514 </span><span class="lineCov">        268 :             printf(&quot;    &quot;);</span></a>
+<a name="512"><span class="lineNum">     512 </span><span class="lineCov">        911 :     if(is_line_head){</span></a>
+<a name="513"><span class="lineNum">     513 </span><span class="lineCov">        421 :         for(i = 0; i &lt; indent_count; i++){</span></a>
+<a name="514"><span class="lineNum">     514 </span><span class="lineCov">        269 :             printf(&quot;    &quot;);</span></a>
 <a name="515"><span class="lineNum">     515 </span>            :         }</a>
-<a name="516"><span class="lineNum">     516 </span><span class="lineCov">        750 :     }else if(token != TSEMI &amp;&amp; token != TCOMMA &amp;&amp; token != TDOT){</span></a>
-<a name="517"><span class="lineNum">     517 </span><span class="lineCov">        577 :         printf(&quot; &quot;);</span></a>
+<a name="516"><span class="lineNum">     516 </span><span class="lineCov">        759 :     }else if(token != TSEMI &amp;&amp; token != TCOMMA &amp;&amp; token != TDOT){</span></a>
+<a name="517"><span class="lineNum">     517 </span><span class="lineCov">        582 :         printf(&quot; &quot;);</span></a>
 <a name="518"><span class="lineNum">     518 </span>            :     }</a>
 <a name="519"><span class="lineNum">     519 </span>            : </a>
-<a name="520"><span class="lineNum">     520 </span><span class="lineCov">        901 :     if(token == TSTRING){</span></a>
+<a name="520"><span class="lineNum">     520 </span><span class="lineCov">        911 :     if(token == TSTRING){</span></a>
 <a name="521"><span class="lineNum">     521 </span><span class="lineCov">         25 :         printf(&quot;'%s'&quot;, string_attr);</span></a>
-<a name="522"><span class="lineNum">     522 </span><span class="lineCov">        876 :     }else if(token == TNAME){</span></a>
-<a name="523"><span class="lineNum">     523 </span><span class="lineCov">        263 :         printf(&quot;%s&quot;, string_attr);</span></a>
-<a name="524"><span class="lineNum">     524 </span><span class="lineCov">        613 :     }else if(token == TNUMBER){</span></a>
+<a name="522"><span class="lineNum">     522 </span><span class="lineCov">        886 :     }else if(token == TNAME){</span></a>
+<a name="523"><span class="lineNum">     523 </span><span class="lineCov">        267 :         printf(&quot;%s&quot;, string_attr);</span></a>
+<a name="524"><span class="lineNum">     524 </span><span class="lineCov">        619 :     }else if(token == TNUMBER){</span></a>
 <a name="525"><span class="lineNum">     525 </span><span class="lineCov">         22 :         sprintf(string_attr, &quot;%d&quot;, num_attr);</span></a>
 <a name="526"><span class="lineNum">     526 </span><span class="lineCov">         22 :         printf(&quot;%s&quot;, string_attr);</span></a>
 <a name="527"><span class="lineNum">     527 </span>            :     }else{</a>
-<a name="528"><span class="lineNum">     528 </span><span class="lineCov">        591 :         printf(&quot;%s&quot;, tokenstr[token]);</span></a>
+<a name="528"><span class="lineNum">     528 </span><span class="lineCov">        597 :         printf(&quot;%s&quot;, tokenstr[token]);</span></a>
 <a name="529"><span class="lineNum">     529 </span>            :     }</a>
-<a name="530"><span class="lineNum">     530 </span><span class="lineCov">        901 :     is_line_head = 0;</span></a>
+<a name="530"><span class="lineNum">     530 </span><span class="lineCov">        911 :     is_line_head = 0;</span></a>
 <a name="531"><span class="lineNum">     531 </span>            : </a>
-<a name="532"><span class="lineNum">     532 </span><span class="lineCov">        901 :     if(token == TSEMI || token == TBEGIN){</span></a>
-<a name="533"><span class="lineNum">     533 </span><span class="lineCov">        106 :         printf(&quot;\n&quot;);</span></a>
-<a name="534"><span class="lineNum">     534 </span><span class="lineCov">        106 :         is_line_head = 1;</span></a>
+<a name="532"><span class="lineNum">     532 </span><span class="lineCov">        911 :     if(token == TSEMI || token == TBEGIN){</span></a>
+<a name="533"><span class="lineNum">     533 </span><span class="lineCov">        107 :         printf(&quot;\n&quot;);</span></a>
+<a name="534"><span class="lineNum">     534 </span><span class="lineCov">        107 :         is_line_head = 1;</span></a>
 <a name="535"><span class="lineNum">     535 </span>            :     }</a>
-<a name="536"><span class="lineNum">     536 </span><span class="lineCov">        901 : }</span></a>
+<a name="536"><span class="lineNum">     536 </span><span class="lineCov">        911 : }</span></a>
 <a name="537"><span class="lineNum">     537 </span>            : /*TODO:return(ERRER)はありえない(必ずerror(mes)でメッセージを出力)</a>
 <a name="538"><span class="lineNum">     538 </span>            :  *     行数をエラー時に表示させる必要がある</a>
 <a name="539"><span class="lineNum">     539 </span>            :  *     sample13のthenでの改行</a>
@@ -608,16 +608,16 @@
 <a name="546"><span class="lineNum">     546 </span><span class="lineNoCov">          0 :     return(ERROR);</span></a>
 <a name="547"><span class="lineNum">     547 </span>            : }</a>
 <a name="548"><span class="lineNum">     548 </span>            : </a>
-<a name="549"><span class="lineNum">     549 </span><span class="lineCov">       1643 : void debug(){</span></a>
+<a name="549"><span class="lineNum">     549 </span><span class="lineCov">       1650 : void debug(){</span></a>
 <a name="550"><span class="lineNum">     550 </span>            :   char input[MAXSTRSIZE];</a>
-<a name="551"><span class="lineNum">     551 </span><span class="lineCov">       1643 :   if(!is_debugmode) return;</span></a>
+<a name="551"><span class="lineNum">     551 </span><span class="lineCov">       1650 :   if(!is_debugmode) return;</span></a>
 <a name="552"><span class="lineNum">     552 </span><span class="lineNoCov">          0 :   printf(&quot;---Please press any key to continue it---&quot;);</span></a>
 <a name="553"><span class="lineNum">     553 </span><span class="lineNoCov">          0 :   fgets(input, MAXSTRSIZE, stdin);</span></a>
 <a name="554"><span class="lineNum">     554 </span><span class="lineNoCov">          0 :   return;</span></a>
 <a name="555"><span class="lineNum">     555 </span>            : }</a>
 <a name="556"><span class="lineNum">     556 </span>            : </a>
-<a name="557"><span class="lineNum">     557 </span><span class="lineCov">       1622 : void debugPrintf(char *message){</span></a>
-<a name="558"><span class="lineNum">     558 </span><span class="lineCov">       1622 :   if(!is_debugmode) return;</span></a>
+<a name="557"><span class="lineNum">     557 </span><span class="lineCov">       1629 : void debugPrintf(char *message){</span></a>
+<a name="558"><span class="lineNum">     558 </span><span class="lineCov">       1629 :   if(!is_debugmode) return;</span></a>
 <a name="559"><span class="lineNum">     559 </span><span class="lineNoCov">          0 :   printf(&quot;%s\n&quot;, message);</span></a>
 <a name="560"><span class="lineNum">     560 </span><span class="lineNoCov">          0 :   fflush(stdout);</span></a>
 <a name="561"><span class="lineNum">     561 </span><span class="lineNoCov">          0 :   return;</span></a>
