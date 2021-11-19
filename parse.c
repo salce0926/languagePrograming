@@ -83,7 +83,6 @@ int type(){
     else if(token == TARRAY){
         CALL(array_type());
     }
-    else return(ERROR);
     return(NORMAL);
 }
 
@@ -99,7 +98,6 @@ int standard_type(){
             JUDGE(TCHAR, "Keyword 'char' is not found");
         }
     }
-    else return(error("Standard type is not found"));
     return(NORMAL);
 }
 
@@ -383,7 +381,6 @@ int constant(){
             JUDGE(TSTRING, "String is not found");
         }
     }
-    else return(ERROR);
     return(NORMAL);
 }
 
@@ -399,7 +396,6 @@ int multiplicative_operator(){
             JUDGE(TAND, "Keyword 'and' is not found");
         }
     }
-    else return(ERROR);
     return(NORMAL);
 }
 
@@ -415,7 +411,6 @@ int additive_operator(){
             JUDGE(TOR, "Keyword 'or' is not found");
         }
     }
-    else return(ERROR);
     return(NORMAL);
 }
 
@@ -437,7 +432,6 @@ int relational_operator(){
             JUDGE(TGREQ, "'>=' is not found");
         }
     }
-    else return(ERROR);
     return(NORMAL);
 }
 
@@ -451,7 +445,6 @@ int input_statement(){
             JUDGE(TREADLN, "Keyword 'readln' is not found");
         }
     }
-    else return(ERROR);
     if(token != TLPAREN) return(NORMAL);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(variable());
@@ -473,7 +466,6 @@ int output_statement(){
             JUDGE(TWRITELN, "Keyword 'writeln' is not found");
         }
     }
-    else return(ERROR);
     if(token != TLPAREN) return(NORMAL);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(output_format());

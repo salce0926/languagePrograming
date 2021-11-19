@@ -8,17 +8,21 @@ program sample29;
 	/*  o : off				*/
 var unused1: integer;
     UnusedArrayForTest: array[200] of char;
+procedure unused;begin end;
 procedure gcmlcm(m, n, gc, lc : integer; m, n, gc, lc : integer);
 	/* gc := GCM(m,n), lc := LCM(m,n) */
 	/* m and n are not changed        */
 var a,b,r : integer;
+ary : array[5] of integer;
 begin
 a := m;
 b := n;
 while b <> 0 do begin
 r := a - (a div b) * b;
 a := b;
-b := r
+b := r;
+ary[3] := +b;
+if boolean (ary[3]) and (1 <= 2) and (6 > 5) and (7 >= 4) = true then break
 end;
 gc := a;
 lc := (m div gc) * n
@@ -106,6 +110,7 @@ end;
 var	x1, x2, y1,y2 : integer;
 var	com :char;
 endflag : boolean;
+testreadwrite : array[5] of char;
 begin
 writeln('   *** Calculator -- h for help ***');
 x1 := 0;  x2 :=1;
@@ -113,6 +118,8 @@ endflag := false;
 while not endflag do begin
 writeln(' Please input command :');
 readln(com, y1);  y2 := 1;
+read(testreadwrite[0], testreadwrite[1]);
+write(testreadwrite[0], true : 5);
 if (com = 'c')  or (com = 'C') then begin x1 := y1; x2 := y2 end
 else if com = '+' then call sum(x1, x2, y1, y2)
 else if com = '-' then call sub(x1, x2, y1, y2)
