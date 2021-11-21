@@ -120,7 +120,3 @@ extern int empty_statement();
 extern void println();
 extern int error();
 extern void prettyPrint(int);
-
-extern void debug();
-extern void debugPrintf(char *);
-extern void debugPrintChar(char *, char);
