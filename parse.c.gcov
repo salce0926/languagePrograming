@@ -1,0 +1,1549 @@
+        -:    0:Source:parse.c
+        -:    0:Graph:parse.gcno
+        -:    0:Data:parse.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "token-list.h"
+        -:    2:
+        -:    3:#define NORMAL 0
+        -:    4:#define ERROR 1
+        -:    5:
+        -:    6:#define CALL(function) if(function == ERROR) return(ERROR)
+        -:    7:#define JUDGE(code, string) if(token != code) return(error(string));prettyPrint(token);token = scan()
+        -:    8:
+        -:    9:int token;
+        -:   10:static int is_line_head = 1;
+        -:   11:static int indent_count = 0;
+        -:   12:static int in_while = 0;
+        -:   13:static int is_debugmode = 0;
+        -:   14:
+        -:   15:extern char *tokenstr[NUMOFTOKEN+1];
+        -:   16:extern char string_attr[MAXSTRSIZE];
+        -:   17:
+function parse_program called 1 returned 100% blocks executed 78%
+        1:   18:int parse_program() {
+        1:   19:    debug();
+call    0 returned 100%
+        1:   20:    debugPrintf("parse_program\n");
+call    0 returned 100%
+        1:   21:    JUDGE(TPROGRAM, "Keyword 'program' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:   22:    JUDGE(TNAME, "Program name is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:   23:    JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:   24:    CALL(block());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        1:   25:    JUDGE(TDOT, "Period is not found at the end of program");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:   26:    return(NORMAL);
+        -:   27:}
+        -:   28:
+function block called 1 returned 100% blocks executed 83%
+        1:   29:int block(){
+        1:   30:    debug();
+call    0 returned 100%
+        1:   31:    debugPrintf("block\n");
+call    0 returned 100%
+        1:   32:    while(token == TVAR || token == TPROCEDURE){
+branch  0 taken 36%
+branch  1 taken 64% (fallthrough)
+branch  2 taken 89%
+branch  3 taken 11% (fallthrough)
+       13:   33:        if(token == TVAR) CALL(variable_declaration());
+branch  0 taken 38% (fallthrough)
+branch  1 taken 62%
+call    2 returned 100%
+branch  3 taken 0% (fallthrough)
+branch  4 taken 100%
+       13:   34:        if(token == TPROCEDURE) CALL(subprogram_declaration());
+branch  0 taken 85% (fallthrough)
+branch  1 taken 15%
+call    2 returned 100%
+branch  3 taken 0% (fallthrough)
+branch  4 taken 100%
+        -:   35:    }
+        1:   36:    indent_count = 0;
+        1:   37:    CALL(compound_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        1:   38:    return(NORMAL);
+        -:   39:}
+        -:   40:
+function variable_declaration called 12 returned 100% blocks executed 77%
+       12:   41:int variable_declaration(){
+       12:   42:    debug();
+call    0 returned 100%
+       12:   43:    debugPrintf("variable_declaration\n");
+call    0 returned 100%
+       12:   44:    indent_count = 1;
+       12:   45:    JUDGE(TVAR, "Keyword 'var' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       12:   46:    CALL(variable_names());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       12:   47:    JUDGE(TCOLON, "Colon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       12:   48:    CALL(type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       12:   49:    JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       26:   50:    while(token == TNAME){
+branch  0 taken 14%
+branch  1 taken 86% (fallthrough)
+        2:   51:        CALL(variable_names());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        2:   52:        JUDGE(TCOLON, "Colon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:   53:        CALL(type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        2:   54:        JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:   55:    }
+       12:   56:    return(NORMAL);
+        -:   57:}
+        -:   58:
+function variable_names called 25 returned 100% blocks executed 81%
+       25:   59:int variable_names(){
+       25:   60:    debug();
+call    0 returned 100%
+       25:   61:    debugPrintf("variable_names\n");
+call    0 returned 100%
+       25:   62:    CALL(variable_name());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       86:   63:    while(token == TCOMMA){
+branch  0 taken 59%
+branch  1 taken 41% (fallthrough)
+       36:   64:        JUDGE(TCOMMA, "Comma is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       36:   65:        CALL(variable_name());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:   66:    }
+       25:   67:    return(NORMAL);
+        -:   68:}
+        -:   69:
+function variable_name called 231 returned 100% blocks executed 88%
+      231:   70:int variable_name(){
+      231:   71:    debug();
+call    0 returned 100%
+      231:   72:    debugPrintf("variable_name\n");
+call    0 returned 100%
+      231:   73:    JUDGE(TNAME, "Variable name is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+      231:   74:    return(NORMAL);
+        -:   75:}
+        -:   76:
+function type called 25 returned 100% blocks executed 81%
+       25:   77:int type(){
+       25:   78:    debug();
+call    0 returned 100%
+       25:   79:    debugPrintf("type\n");
+call    0 returned 100%
+       25:   80:    if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
+branch  0 taken 20% (fallthrough)
+branch  1 taken 80%
+branch  2 taken 80% (fallthrough)
+branch  3 taken 20%
+branch  4 taken 50% (fallthrough)
+branch  5 taken 50%
+       23:   81:        CALL(standard_type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:   82:    }
+        2:   83:    else if(token == TARRAY){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        2:   84:        CALL(array_type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:   85:    }
+    #####:   86:    else return(ERROR);
+       25:   87:    return(NORMAL);
+        -:   88:}
+        -:   89:
+function standard_type called 25 returned 100% blocks executed 85%
+       25:   90:int standard_type(){
+       25:   91:    debug();
+call    0 returned 100%
+       25:   92:    debugPrintf("standard_type\n");
+call    0 returned 100%
+       25:   93:    if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
+branch  0 taken 20% (fallthrough)
+branch  1 taken 80%
+branch  2 taken 80% (fallthrough)
+branch  3 taken 20%
+branch  4 taken 100% (fallthrough)
+branch  5 taken 0%
+       50:   94:        if(token == TINTEGER){
+branch  0 taken 80% (fallthrough)
+branch  1 taken 20%
+       20:   95:            JUDGE(TINTEGER, "Keyword 'integer' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        5:   96:        }else if(token == TBOOLEAN){
+branch  0 taken 20% (fallthrough)
+branch  1 taken 80%
+        1:   97:            JUDGE(TBOOLEAN, "Keyword 'boolean' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        4:   98:        }else if(token == TCHAR){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        4:   99:            JUDGE(TCHAR, "Keyword 'char' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  100:        }
+        -:  101:    }
+    #####:  102:    else return(error("Standard type is not found"));
+call    0 never executed
+       25:  103:    return(NORMAL);
+        -:  104:}
+        -:  105:
+function array_type called 2 returned 100% blocks executed 78%
+        2:  106:int array_type(){
+        2:  107:    debug();
+call    0 returned 100%
+        2:  108:    debugPrintf("array_type\n");
+call    0 returned 100%
+        2:  109:    JUDGE(TARRAY, "Keyword 'array' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  110:    JUDGE(TLSQPAREN, "'[' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  111:    JUDGE(TNUMBER, "Index number is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  112:    JUDGE(TRSQPAREN, "']' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  113:    JUDGE(TOF, "Keyword 'of' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  114:    CALL(standard_type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        2:  115:    return(NORMAL);
+        -:  116:}
+        -:  117:
+function subprogram_declaration called 11 returned 100% blocks executed 77%
+       11:  118:int subprogram_declaration(){
+       11:  119:    debug();
+call    0 returned 100%
+       11:  120:    debugPrintf("subprogram_declaration\n");
+call    0 returned 100%
+       11:  121:    indent_count = 1;
+       11:  122:    JUDGE(TPROCEDURE, "Keyword 'procedure' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  123:    CALL(procedure_name());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       11:  124:    if(token == TLPAREN) CALL(formal_parameters());
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+call    2 returned 100%
+branch  3 taken 0% (fallthrough)
+branch  4 taken 100%
+       11:  125:    JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  126:    if(token == TVAR) CALL(variable_declaration());
+branch  0 taken 64% (fallthrough)
+branch  1 taken 36%
+call    2 returned 100%
+branch  3 taken 0% (fallthrough)
+branch  4 taken 100%
+       11:  127:    indent_count = 1;
+       11:  128:    CALL(compound_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       11:  129:    JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  130:    return(NORMAL);
+        -:  131:}
+        -:  132:
+function procedure_name called 31 returned 100% blocks executed 88%
+       31:  133:int procedure_name(){
+       31:  134:    debug();
+call    0 returned 100%
+       31:  135:    debugPrintf("procedure_name\n");
+call    0 returned 100%
+       31:  136:    JUDGE(TNAME, "Procedure name is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       31:  137:    return(NORMAL);
+        -:  138:}
+        -:  139:
+function formal_parameters called 11 returned 100% blocks executed 50%
+       11:  140:int formal_parameters(){
+       11:  141:    debug();
+call    0 returned 100%
+       11:  142:    debugPrintf("formal_parameters\n");
+call    0 returned 100%
+       11:  143:    JUDGE(TLPAREN, "'(' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  144:    CALL(variable_names());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       11:  145:    JUDGE(TCOLON, "Colon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  146:    CALL(type());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       22:  147:    while(token == TSEMI){
+branch  0 taken 0%
+branch  1 taken 100% (fallthrough)
+    #####:  148:        JUDGE(TSEMI, "Semicolon is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  149:        CALL(variable_names());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  150:        JUDGE(TCOLON, "Colon is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  151:        CALL(type());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  152:    }
+       11:  153:    JUDGE(TRPAREN, "')' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       11:  154:    return(NORMAL);
+        -:  155:}
+        -:  156:
+function compound_statement called 21 returned 100% blocks executed 80%
+       21:  157:int compound_statement(){
+       21:  158:    debug();
+call    0 returned 100%
+       21:  159:    debugPrintf("compound_statement\n");
+call    0 returned 100%
+       21:  160:    JUDGE(TBEGIN, "Keyword 'begin' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       21:  161:    indent_count++;
+       21:  162:    CALL(statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       90:  163:    while(token == TSEMI){
+branch  0 taken 70%
+branch  1 taken 30% (fallthrough)
+       48:  164:        JUDGE(TSEMI, "Semicolon is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       48:  165:        CALL(statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  166:    }
+       21:  167:    debug();
+call    0 returned 100%
+       21:  168:    indent_count--;
+       21:  169:    JUDGE(TEND, "Keyword 'end' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       21:  170:    return(NORMAL);
+        -:  171:}
+        -:  172:
+function statement called 102 returned 100% blocks executed 70%
+      102:  173:int statement(){
+      102:  174:    debug();
+call    0 returned 100%
+      102:  175:    debugPrintf("statement\n");
+call    0 returned 100%
+        -:  176:    /*
+        -:  177:    if(token == TWRITELN) {
+        -:  178:        printf("token:%d\n", token);
+        -:  179:        CALL(output_statement());
+        -:  180:    }
+        -:  181:    */
+      102:  182:    if(token == TNAME){
+branch  0 taken 33% (fallthrough)
+branch  1 taken 67%
+       34:  183:        CALL(assignment_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  184:    } 
+       68:  185:    else if(token == TIF){
+branch  0 taken 25% (fallthrough)
+branch  1 taken 75%
+       17:  186:        CALL(condition_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  187:    } 
+       51:  188:    else if(token == TWHILE){
+branch  0 taken 4% (fallthrough)
+branch  1 taken 96%
+        2:  189:        CALL(iteration_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  190:    }
+       49:  191:    else if(token == TBREAK){
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+    #####:  192:        CALL(exit_statement());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  193:    }
+       49:  194:    else if(token == TCALL){
+branch  0 taken 41% (fallthrough)
+branch  1 taken 59%
+       20:  195:        CALL(call_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  196:    }
+       29:  197:    else if(token == TRETURN){
+branch  0 taken 7% (fallthrough)
+branch  1 taken 93%
+        2:  198:        CALL(return_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  199:    }
+       27:  200:    else if(token == TREAD || token == TREADLN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+branch  2 taken 4% (fallthrough)
+branch  3 taken 96%
+        1:  201:        CALL(input_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  202:    }
+       26:  203:    else if(token == TWRITE || token == TWRITELN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+branch  2 taken 65% (fallthrough)
+branch  3 taken 35%
+       17:  204:        CALL(output_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  205:    }
+        9:  206:    else if(token == TBEGIN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        9:  207:        CALL(compound_statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  208:    }
+        -:  209:    else{
+    #####:  210:        CALL(empty_statement());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  211:    }
+      102:  212:    return(NORMAL);
+        -:  213:}
+        -:  214:
+function condition_statement called 17 returned 100% blocks executed 78%
+       17:  215:int condition_statement(){
+       17:  216:    debug();
+call    0 returned 100%
+       17:  217:    debugPrintf("condition_statement\n");
+call    0 returned 100%
+       17:  218:    JUDGE(TIF, "Keyword 'if' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       17:  219:    CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       17:  220:    JUDGE(TTHEN, "Keyword 'then' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       17:  221:    CALL(statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       17:  222:    if(token != TELSE) return(NORMAL);
+branch  0 taken 18% (fallthrough)
+branch  1 taken 82%
+       14:  223:    JUDGE(TELSE, "Keyword 'else' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       14:  224:    CALL(statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       14:  225:    return(NORMAL);
+        -:  226:}
+        -:  227:
+function iteration_statement called 2 returned 100% blocks executed 78%
+        2:  228:int iteration_statement(){
+        2:  229:    debug();
+call    0 returned 100%
+        2:  230:    debugPrintf("iteration_statement\n");
+call    0 returned 100%
+        2:  231:    in_while++;
+        2:  232:    JUDGE(TWHILE, "Keyword 'while' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  233:    CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        2:  234:    JUDGE(TDO, "Keyword 'do' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  235:    CALL(statement());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        2:  236:    in_while--;
+        2:  237:    return(NORMAL);
+        -:  238:}
+        -:  239:
+function exit_statement called 0 returned 0% blocks executed 0%
+    #####:  240:int exit_statement(){
+    #####:  241:    debug();
+call    0 never executed
+    #####:  242:    debugPrintf("exit_statement\n");
+call    0 never executed
+    #####:  243:    if(in_while < 1) return(error("Keyword 'break' must be included in at least one iteration sentence."));
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+    #####:  244:    JUDGE(TBREAK, "Keyword 'break' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  245:    return(NORMAL);
+        -:  246:}
+        -:  247:
+function call_statement called 20 returned 100% blocks executed 75%
+       20:  248:int call_statement(){
+       20:  249:    debug();
+call    0 returned 100%
+       20:  250:    debugPrintf("call_statement\n");
+call    0 returned 100%
+       20:  251:    JUDGE(TCALL, "Keyword 'call' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       20:  252:    CALL(procedure_name());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       20:  253:    if(token != TLPAREN) return(NORMAL);
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+       20:  254:    JUDGE(TLPAREN, "'(' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       20:  255:    CALL(expressions());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       20:  256:    JUDGE(TRPAREN, "')' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       20:  257:    return(NORMAL);
+        -:  258:}
+        -:  259:
+function expressions called 20 returned 100% blocks executed 81%
+       20:  260:int expressions(){
+       20:  261:    debug();
+call    0 returned 100%
+       20:  262:    debugPrintf("expressions\n");
+call    0 returned 100%
+       20:  263:    CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       80:  264:    while(token == TCOMMA){
+branch  0 taken 67%
+branch  1 taken 33% (fallthrough)
+       40:  265:        JUDGE(TCOMMA, "Comma is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       40:  266:        CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  267:    }
+       20:  268:    return(NORMAL);
+        -:  269:}
+        -:  270:
+function return_statement called 2 returned 100% blocks executed 88%
+        2:  271:int return_statement(){
+        2:  272:    debug();
+call    0 returned 100%
+        2:  273:    debugPrintf("return_statement\n");
+call    0 returned 100%
+        2:  274:    JUDGE(TRETURN, "Keyword 'return' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  275:    return(NORMAL);
+        -:  276:}
+        -:  277:
+function assignment_statement called 34 returned 100% blocks executed 79%
+       34:  278:int assignment_statement(){
+       34:  279:    debug();
+call    0 returned 100%
+       34:  280:    debugPrintf("assignment_statement\n");
+call    0 returned 100%
+       34:  281:    CALL(left_part());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       34:  282:    JUDGE(TASSIGN, "':=' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       34:  283:    CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       34:  284:    return(NORMAL);
+        -:  285:}
+        -:  286:
+function left_part called 34 returned 100% blocks executed 86%
+       34:  287:int left_part(){
+       34:  288:    debug();
+call    0 returned 100%
+       34:  289:    debugPrintf("left_part\n");
+call    0 returned 100%
+       34:  290:    CALL(variable());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       34:  291:    return(NORMAL);
+        -:  292:}
+        -:  293:
+function variable called 170 returned 100% blocks executed 35%
+      170:  294:int variable(){
+      170:  295:    debug();
+call    0 returned 100%
+      170:  296:    debugPrintf("variable\n");
+call    0 returned 100%
+      170:  297:    CALL(variable_name());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+      170:  298:    if(token != TLSQPAREN) return(NORMAL);
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+    #####:  299:    JUDGE(TLSQPAREN, "'[' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  300:    CALL(expression());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  301:    JUDGE(TRSQPAREN, "']' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  302:    return(NORMAL);
+        -:  303:}
+        -:  304:
+function expression called 150 returned 100% blocks executed 85%
+      150:  305:int expression(){
+      150:  306:    debug();
+call    0 returned 100%
+      150:  307:    debugPrintf("expression\n");
+call    0 returned 100%
+      150:  308:    CALL(simple_expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+      321:  309:    while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
+branch  0 taken 11%
+branch  1 taken 89% (fallthrough)
+branch  2 taken 1%
+branch  3 taken 99% (fallthrough)
+branch  4 taken 1%
+branch  5 taken 99% (fallthrough)
+branch  6 taken 0%
+branch  7 taken 100% (fallthrough)
+branch  8 taken 0%
+branch  9 taken 100% (fallthrough)
+branch 10 taken 0%
+branch 11 taken 100% (fallthrough)
+       21:  310:        CALL(relational_operator());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       21:  311:        CALL(simple_expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  312:    }
+      150:  313:    return(NORMAL);
+        -:  314:}
+        -:  315:
+function simple_expression called 171 returned 100% blocks executed 71%
+      171:  316:int simple_expression(){
+      171:  317:    debug();
+call    0 returned 100%
+      171:  318:    debugPrintf("simple_expresssion\n");
+call    0 returned 100%
+      171:  319:    if(token == TPLUS || token == TMINUS){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+branch  2 taken 2% (fallthrough)
+branch  3 taken 98%
+        4:  320:        if(token == TPLUS){
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+    #####:  321:            JUDGE(TPLUS, "'+' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+        4:  322:        }else if(token == TMINUS){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        4:  323:            JUDGE(TMINUS, "'-' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  324:        }
+        -:  325:    }
+      171:  326:    CALL(term());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+      348:  327:    while(token == TPLUS || token == TMINUS || token == TOR){
+branch  0 taken 1%
+branch  1 taken 99% (fallthrough)
+branch  2 taken 1%
+branch  3 taken 99% (fallthrough)
+branch  4 taken 2%
+branch  5 taken 98% (fallthrough)
+        6:  328:        CALL(additive_operator());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        6:  329:        CALL(term());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  330:    }
+      171:  331:    return(NORMAL);
+        -:  332:}
+        -:  333:
+function term called 177 returned 100% blocks executed 82%
+      177:  334:int term(){
+      177:  335:    debug();
+call    0 returned 100%
+      177:  336:    debugPrintf("term\n");
+call    0 returned 100%
+      177:  337:    CALL(factor());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+      370:  338:    while(token == TSTAR || token == TDIV || token == TAND){
+branch  0 taken 3%
+branch  1 taken 97% (fallthrough)
+branch  2 taken 5%
+branch  3 taken 95% (fallthrough)
+branch  4 taken 0%
+branch  5 taken 100% (fallthrough)
+       16:  339:        CALL(multiplicative_operator());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       16:  340:        CALL(factor());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  341:    }
+      177:  342:    return(NORMAL);
+        -:  343:}
+        -:  344:
+function factor called 194 returned 100% blocks executed 55%
+      194:  345:int factor(){
+      194:  346:    debug();
+call    0 returned 100%
+      194:  347:    debugPrintf("factor\n");
+call    0 returned 100%
+      194:  348:    if(token == TNAME){
+branch  0 taken 69% (fallthrough)
+branch  1 taken 31%
+      134:  349:        CALL(variable());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  350:    }
+       60:  351:    else if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
+branch  0 taken 67% (fallthrough)
+branch  1 taken 33%
+branch  2 taken 98% (fallthrough)
+branch  3 taken 3%
+branch  4 taken 97% (fallthrough)
+branch  5 taken 3%
+branch  6 taken 66% (fallthrough)
+branch  7 taken 34%
+       47:  352:        CALL(constant());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  353:    }
+       13:  354:    else if(token == TLPAREN){
+branch  0 taken 92% (fallthrough)
+branch  1 taken 8%
+       12:  355:        JUDGE(TLPAREN, "'(' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       12:  356:        CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       12:  357:        JUDGE(TRPAREN, "')' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  358:    }
+        1:  359:    else if(token == TNOT){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        1:  360:        JUDGE(TNOT, "Keyword 'not' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:  361:        CALL(factor());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  362:    }
+    #####:  363:    else if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  364:        CALL(standard_type());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  365:        JUDGE(TLPAREN, "'(' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  366:        CALL(expression());
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  367:        JUDGE(TRPAREN, "')' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+        -:  368:    }
+      194:  369:    return(NORMAL);
+        -:  370:}
+        -:  371:
+function constant called 47 returned 100% blocks executed 85%
+       47:  372:int constant(){
+       47:  373:    debug();
+call    0 returned 100%
+       47:  374:    debugPrintf("constant\n");
+call    0 returned 100%
+       47:  375:    if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
+branch  0 taken 57% (fallthrough)
+branch  1 taken 43%
+branch  2 taken 96% (fallthrough)
+branch  3 taken 4%
+branch  4 taken 96% (fallthrough)
+branch  5 taken 4%
+branch  6 taken 100% (fallthrough)
+branch  7 taken 0%
+       94:  376:        if(token == TNUMBER){
+branch  0 taken 43% (fallthrough)
+branch  1 taken 57%
+       20:  377:            JUDGE(TNUMBER, "Number is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       27:  378:        }else if(token == TFALSE){
+branch  0 taken 4% (fallthrough)
+branch  1 taken 96%
+        1:  379:            JUDGE(TFALSE, "Keyword 'false' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       26:  380:        }else if(token == TTRUE){
+branch  0 taken 4% (fallthrough)
+branch  1 taken 96%
+        1:  381:            JUDGE(TTRUE, "Keyword 'true' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       25:  382:        }else if(token == TSTRING){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+       25:  383:            JUDGE(TSTRING, "String is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  384:        }
+        -:  385:    }
+    #####:  386:    else return(ERROR);
+       47:  387:    return(NORMAL);
+        -:  388:}
+        -:  389:
+function multiplicative_operator called 16 returned 100% blocks executed 63%
+       16:  390:int multiplicative_operator(){
+       16:  391:    debug();
+call    0 returned 100%
+       16:  392:    debugPrintf("multiplicative_operator\n");
+call    0 returned 100%
+       16:  393:    if(token == TSTAR || token == TDIV || token == TAND){
+branch  0 taken 63% (fallthrough)
+branch  1 taken 38%
+branch  2 taken 0% (fallthrough)
+branch  3 taken 100%
+branch  4 never executed
+branch  5 never executed
+       32:  394:        if(token == TSTAR){
+branch  0 taken 38% (fallthrough)
+branch  1 taken 63%
+        6:  395:            JUDGE(TSTAR, "'*' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       10:  396:        }else if(token == TDIV){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+       10:  397:            JUDGE(TDIV, "Keyword 'div' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+    #####:  398:        }else if(token == TAND){
+branch  0 never executed
+branch  1 never executed
+    #####:  399:            JUDGE(TAND, "Keyword 'and' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+        -:  400:        }
+        -:  401:    }
+    #####:  402:    else return(ERROR);
+       16:  403:    return(NORMAL);
+        -:  404:}
+        -:  405:
+function additive_operator called 6 returned 100% blocks executed 85%
+        6:  406:int additive_operator(){
+        6:  407:    debug();
+call    0 returned 100%
+        6:  408:    debugPrintf("additive_operator\n");
+call    0 returned 100%
+        6:  409:    if(token == TPLUS || token == TMINUS || token == TOR){
+branch  0 taken 83% (fallthrough)
+branch  1 taken 17%
+branch  2 taken 80% (fallthrough)
+branch  3 taken 20%
+branch  4 taken 100% (fallthrough)
+branch  5 taken 0%
+       12:  410:        if(token == TPLUS){
+branch  0 taken 17% (fallthrough)
+branch  1 taken 83%
+        1:  411:            JUDGE(TPLUS, "'+' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        5:  412:        }else if(token == TMINUS){
+branch  0 taken 20% (fallthrough)
+branch  1 taken 80%
+        1:  413:            JUDGE(TMINUS, "'-' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        4:  414:        }else if(token == TOR){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        4:  415:            JUDGE(TOR, "Keyword 'or' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  416:        }
+        -:  417:    }
+    #####:  418:    else return(ERROR);
+        6:  419:    return(NORMAL);
+        -:  420:}
+        -:  421:
+function relational_operator called 21 returned 100% blocks executed 48%
+       21:  422:int relational_operator(){
+       21:  423:    debug();
+call    0 returned 100%
+       21:  424:    debugPrintf("relational_operator\n");
+call    0 returned 100%
+       21:  425:    if(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ ||token == TGR || token == TGREQ){
+branch  0 taken 14% (fallthrough)
+branch  1 taken 86%
+branch  2 taken 67% (fallthrough)
+branch  3 taken 33%
+branch  4 taken 0% (fallthrough)
+branch  5 taken 100%
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+branch  9 never executed
+branch 10 never executed
+branch 11 never executed
+       42:  426:        if(token == TEQUAL){
+branch  0 taken 86% (fallthrough)
+branch  1 taken 14%
+       18:  427:            JUDGE(TEQUAL, "'=' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        3:  428:        }else if(token == TNOTEQ){
+branch  0 taken 33% (fallthrough)
+branch  1 taken 67%
+        1:  429:            JUDGE(TNOTEQ, "'<>' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        2:  430:        }else if(token == TLE){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        2:  431:            JUDGE(TLE, "'<' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+    #####:  432:        }else if(token == TLEEQ){
+branch  0 never executed
+branch  1 never executed
+    #####:  433:            JUDGE(TLEEQ, "'<=' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  434:        }else if(token == TGR){
+branch  0 never executed
+branch  1 never executed
+    #####:  435:            JUDGE(TGR, "'>' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  436:        }else if(token == TGREQ){
+branch  0 never executed
+branch  1 never executed
+    #####:  437:            JUDGE(TGREQ, "'>=' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+        -:  438:        }
+        -:  439:    }
+    #####:  440:    else return(ERROR);
+       21:  441:    return(NORMAL);
+        -:  442:}
+        -:  443:
+function input_statement called 1 returned 100% blocks executed 69%
+        1:  444:int input_statement(){
+        1:  445:    debug();
+call    0 returned 100%
+        1:  446:    debugPrintf("input_statement\n");
+call    0 returned 100%
+        1:  447:    if(token == TREAD || token == TREADLN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+branch  2 taken 100% (fallthrough)
+branch  3 taken 0%
+        2:  448:        if(token == TREAD){
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+    #####:  449:            JUDGE(TREAD, "Keyword 'read' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+        1:  450:        }else if(token == TREADLN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+        1:  451:            JUDGE(TREADLN, "Keyword 'readln' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  452:        }
+        -:  453:    }
+    #####:  454:    else return(ERROR);
+        1:  455:    if(token != TLPAREN) return(NORMAL);
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+        1:  456:    JUDGE(TLPAREN, "'(' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:  457:    CALL(variable());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        3:  458:    while(token == TCOMMA){
+branch  0 taken 50%
+branch  1 taken 50% (fallthrough)
+        1:  459:        JUDGE(TCOMMA, "Comma is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:  460:        CALL(variable());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  461:    }
+        1:  462:    JUDGE(TRPAREN, "')' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        1:  463:    return(NORMAL);
+        -:  464:}
+        -:  465:
+function output_statement called 17 returned 100% blocks executed 71%
+       17:  466:int output_statement(){
+       17:  467:    debug();
+call    0 returned 100%
+       17:  468:    debugPrintf("output_statement\n");
+call    0 returned 100%
+       17:  469:    if(token == TWRITE || token == TWRITELN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+branch  2 taken 100% (fallthrough)
+branch  3 taken 0%
+       34:  470:        if(token == TWRITE){
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+    #####:  471:            JUDGE(TWRITE, "Keyword 'write' is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+       17:  472:        }else if(token == TWRITELN){
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+       17:  473:            JUDGE(TWRITELN, "Keyword 'writeln' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+        -:  474:        }
+        -:  475:    }
+    #####:  476:    else return(ERROR);
+       17:  477:    if(token != TLPAREN) return(NORMAL);
+branch  0 taken 12% (fallthrough)
+branch  1 taken 88%
+       15:  478:    JUDGE(TLPAREN, "'(' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       15:  479:    CALL(output_format());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       40:  480:    while(token == TCOMMA){
+branch  0 taken 40%
+branch  1 taken 60% (fallthrough)
+       10:  481:        JUDGE(TCOMMA, "Comma is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       10:  482:        CALL(output_format());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+        -:  483:    }
+       15:  484:    JUDGE(TRPAREN, "')' is not found");
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+call    2 never executed
+call    3 returned 100%
+call    4 returned 100%
+       15:  485:    return(NORMAL);
+        -:  486:}
+        -:  487:
+function output_format called 25 returned 100% blocks executed 41%
+       25:  488:int output_format(){
+       25:  489:    debug();
+call    0 returned 100%
+       25:  490:    debugPrintf("output_format\n");
+call    0 returned 100%
+       25:  491:    CALL(expression());
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+       25:  492:    if(token != TCOLON) return(NORMAL);
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+    #####:  493:    JUDGE(TCOLON, "Colon is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  494:    JUDGE(TNUMBER, "Number is not found");
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  495:    return(NORMAL);
+        -:  496:}
+        -:  497:
+function empty_statement called 0 returned 0% blocks executed 0%
+    #####:  498:int empty_statement(){
+    #####:  499:    debug();
+call    0 never executed
+    #####:  500:    debugPrintf("empty_statement\n");
+call    0 never executed
+    #####:  501:    return(NORMAL);
+        -:  502:}
+        -:  503:
+function prettyPrint called 901 returned 100% blocks executed 100%
+      901:  504:void prettyPrint(int token){
+        -:  505:    int i;
+        -:  506:    /*TODO:行番号出力したい
+        -:  507:     *     引数が大域変数なので消して良い */
+      901:  508:    if(!is_line_head && (token == TBEGIN || token == TEND || token == TELSE)){
+branch  0 taken 88% (fallthrough)
+branch  1 taken 12%
+branch  2 taken 99% (fallthrough)
+branch  3 taken 1%
+branch  4 taken 97% (fallthrough)
+branch  5 taken 3%
+branch  6 taken 2% (fallthrough)
+branch  7 taken 98%
+       44:  509:        printf("\n");
+call    0 returned 100%
+       44:  510:        is_line_head = 1;
+        -:  511:    }
+      901:  512:    if(is_line_head){
+branch  0 taken 17% (fallthrough)
+branch  1 taken 83%
+      419:  513:        for(i = 0; i < indent_count; i++){
+branch  0 taken 64%
+branch  1 taken 36%
+      268:  514:            printf("    ");
+call    0 returned 100%
+        -:  515:        }
+      750:  516:    }else if(token != TSEMI && token != TCOMMA && token != TDOT){
+branch  0 taken 89% (fallthrough)
+branch  1 taken 11%
+branch  2 taken 87% (fallthrough)
+branch  3 taken 13%
+branch  4 taken 99% (fallthrough)
+branch  5 taken 1%
+      577:  517:        printf(" ");
+call    0 returned 100%
+        -:  518:    }
+        -:  519:
+      901:  520:    if(token == TSTRING){
+branch  0 taken 3% (fallthrough)
+branch  1 taken 97%
+       25:  521:        printf("'%s'", string_attr);
+call    0 returned 100%
+      876:  522:    }else if(token == TNAME){
+branch  0 taken 30% (fallthrough)
+branch  1 taken 70%
+      263:  523:        printf("%s", string_attr);
+call    0 returned 100%
+      613:  524:    }else if(token == TNUMBER){
+branch  0 taken 4% (fallthrough)
+branch  1 taken 96%
+       22:  525:        sprintf(string_attr, "%d", num_attr);
+       22:  526:        printf("%s", string_attr);
+call    0 returned 100%
+        -:  527:    }else{
+      591:  528:        printf("%s", tokenstr[token]);
+call    0 returned 100%
+        -:  529:    }
+      901:  530:    is_line_head = 0;
+        -:  531:
+      901:  532:    if(token == TSEMI || token == TBEGIN){
+branch  0 taken 91% (fallthrough)
+branch  1 taken 9%
+branch  2 taken 3% (fallthrough)
+branch  3 taken 97%
+      106:  533:        printf("\n");
+call    0 returned 100%
+      106:  534:        is_line_head = 1;
+        -:  535:    }
+      901:  536:}
+        -:  537:/*TODO:return(ERRER)はありえない(必ずerror(mes)でメッセージを出力)
+        -:  538: *     行数をエラー時に表示させる必要がある
+        -:  539: *     sample13のthenでの改行
+        -:  540: *     sample026で00が通ってしまう
+        -:  541: * */
+        -:  542:
+function error called 0 returned 0% blocks executed 0%
+    #####:  543:int error(char *mes){
+    #####:  544:    printf("¥n ERROR: %s¥n", mes);
+call    0 never executed
+    #####:  545:    end_scan(); /* 入力ファイルを閉じる */
+call    0 never executed
+    #####:  546:    return(ERROR);
+        -:  547:}
+        -:  548:
+function debug called 1643 returned 100% blocks executed 57%
+     1643:  549:void debug(){
+        -:  550:  char input[MAXSTRSIZE];
+     1643:  551:  if(!is_debugmode) return;
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+    #####:  552:  printf("---Please press any key to continue it---");
+call    0 never executed
+    #####:  553:  fgets(input, MAXSTRSIZE, stdin);
+call    0 never executed
+    #####:  554:  return;
+        -:  555:}
+        -:  556:
+function debugPrintf called 1622 returned 100% blocks executed 50%
+     1622:  557:void debugPrintf(char *message){
+     1622:  558:  if(!is_debugmode) return;
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+    #####:  559:  printf("%s\n", message);
+call    0 never executed
+    #####:  560:  fflush(stdout);
+call    0 never executed
+    #####:  561:  return;
+        -:  562:}
+        -:  563:
+function debugPrintChar called 0 returned 0% blocks executed 0%
+    #####:  564:void debugPrintChar(char *message, char c){
+    #####:  565:	if(!is_debugmode) return;
+branch  0 never executed
+branch  1 never executed
+    #####:  566:	printf("%s%c\n", message, c);
+call    0 never executed
+    #####:  567:	fflush(stdout);
+call    0 never executed
+    #####:  568:	return;
+        -:  569:}

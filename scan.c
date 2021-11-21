@@ -11,15 +11,15 @@ char string_attr[MAXSTRSIZE];
 static int public_linenum = 0;
 static int private_linenum = 0;
 static int newline = 1;
+static int pre_cbuf = 0;
 static int is_error = 0;
-static int is_debugmode = 0;
 FILE *fp;
 
 
 int my_getc(int type){
 	int cbuf = fgetc(fp);
 
-	//EOF is returned immediately
+	/*EOF is returned immediately*/
 	if(cbuf == EOF){
 		if(type == STRING || type == COMMENT){
 			printf("parse error at end of input.\n");
@@ -28,23 +28,34 @@ int my_getc(int type){
 		return -1;
 	}
 
-	//judging a new line
+	/*judging a new line*/
 	if(cbuf == '\r'){
-		cbuf = fgetc(fp);
-		//assume that whitespace is read ahead
-		if(cbuf == '\n') cbuf = ' ';
+		/*assume that whitespace is read ahead*/
+		cbuf = ' ';
+		if(pre_cbuf == '\n') {
+			pre_cbuf = 0;
+			return cbuf;
+		}
+		pre_cbuf = '\r';
 		newline = 1;
 		return cbuf;
 	}
 	else if(cbuf == '\n'){
-		cbuf = fgetc(fp);
-		//assume that whitespace is read ahead
-		if(cbuf == '\r') cbuf = ' ';
+		cbuf = ' ';
+		/*assume that whitespace is read ahead*/
+		if(pre_cbuf == '\r'){
+			pre_cbuf = 0;
+			return cbuf;
+		}
+		pre_cbuf = '\n';
 		newline = 1;
 		return cbuf;
 	}
+	else{
+		pre_cbuf = 0;
+	}
 
-	//Do not pass anything but display characters and tabs
+	/*Do not pass anything but display characters and tabs*/
 	if(!isprint(cbuf) && cbuf != '\t'){
 		return -1;
 	}
@@ -63,26 +74,26 @@ int init_scan(char* filename){
 int scan(){
 	while(cbuf != EOF){
 		if(is_error == 1) return -1;
-		//spaces are skip over
+		/*spaces are skip over*/
 		if(cbuf == ' ' || cbuf == '\t'){
 			check_line(SEPARATOR);
 			continue;
 		}
-		//skip the annotations too
+		/*skip the annotations too*/
 		else if(cbuf == '{'){
 			while(cbuf != '}' && cbuf >= 0) check_line(COMMENT);
 			if(cbuf < 0) return -1;
 			check_line(SEPARATOR);
 		}
 		else if(cbuf == '/'){
+			int skip = 0;
 			check_line(COMMENT);
 			if(cbuf != '*'){
-				//it's not an annotation and "/" is not a symbol
+				/*it's not an annotation and "/" is not a symbol*/
 				printf("in line %d, unknown symbol:/\n", get_linenum());
 				return -1;
 			}
 			check_line(COMMENT);
-			int skip = 0;
 			while(!(cbuf == '/' && skip == 1)){
 				if(cbuf < 0 || is_error == 1) return -1;
 				if(cbuf == '*') skip = 1;
@@ -91,10 +102,10 @@ int scan(){
 			check_line(SEPARATOR);
 			continue;
 		}
-		//for strings, wait for single quote
+		/*for strings, wait for single quote*/
 		else if(cbuf == '\''){
-			check_line(STRING);
 			int i;
+			check_line(STRING);
 			for(i = 0; i < MAXSTRSIZE; i++){
 				string_attr[i] = '\0';
 			}
@@ -115,7 +126,7 @@ int scan(){
 			string_attr[i] = '\0';
 			return TSTRING;
 		}
-		//for alphabets, read as long as the letter or number follows
+		/*for alphabets, read as long as the letter or number follows*/
 		else if(isalpha(cbuf)){
 			int i;
 			for(i = 0; i < MAXSTRSIZE; i++){
@@ -139,9 +150,13 @@ int scan(){
 			}
 			return TNAME;
 		}
-		//for numbers, read as long as the number follows
+		/*for numbers, read as long as the number follows*/
 		else if(isdigit(cbuf)){
 			int i = 0;
+			for(i = 0; i < MAXSTRSIZE; i++){
+				string_attr[i] = '\0';
+			}
+			i = 0;
 			while(isdigit(cbuf)){
 				string_attr[i++] = cbuf;
 				check_line(TOKEN);
@@ -154,7 +169,7 @@ int scan(){
 			}
 			return TNUMBER;
 		}
-		//the case of a symbol
+		/*the case of a symbol*/
 		else if(cbuf == '+'){
 			check_line(TOKEN);
 			return TPLUS;

@@ -1,12 +1,13 @@
 #
 # Makefile for LP
 #
-OBJS=token-list.o id-list.o scan.o
+OBJS=token-list.o id-list.o scan.o parse.o
+CFLAGS=-std=c89 -pedantic-errors -Werror=pedantic --coverage
 
-all: scan
+all: parse
 
-scan: ${OBJS}
-	${CC} -o $@ $^
+parse: ${OBJS}
+	${CC} ${CFLAGS} -o $@ $^
 
 clean:
 	${RM} *.o scan *~
