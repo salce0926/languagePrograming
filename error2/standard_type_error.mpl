@@ -1,0 +1,1 @@
+program name ; var name : array [ 0 ] of a
