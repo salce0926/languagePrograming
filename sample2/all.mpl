@@ -1,4 +1,4 @@
-program sample29;
+program all;
 	/* Calculator program	*/
 	/*  c n : clear & set n	*/
 	/*  + n : add n			*/
