@@ -83,6 +83,7 @@ int type(){
     else if(token == TARRAY){
         CALL(array_type());
     }
+    else return(error("Type is not found"));
     return(NORMAL);
 }
 
@@ -98,6 +99,7 @@ int standard_type(){
             JUDGE(TCHAR, "Keyword 'char' is not found");
         }
     }
+    else return(error("Standard type is not found"));
     return(NORMAL);
 }
 
@@ -364,6 +366,7 @@ int factor(){
         CALL(expression());
         JUDGE(TRPAREN, "')' is not found");
     }
+    else return(error("Factor is not found"));
     return(NORMAL);
 }
 
@@ -533,7 +536,7 @@ void prettyPrint(int token){
  * */
 
 int error(char *mes){
-    printf("¥n ERROR: %s¥n", mes);
+    printf("\n in line %d, ERROR: %s\n", get_linenum(), mes);
     end_scan(); /* 入力ファイルを閉じる */
     return(ERROR);
 }

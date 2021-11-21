@@ -43,7 +43,7 @@ int my_getc(int type){
 	else if(cbuf == '\n'){
 		cbuf = ' ';
 		/*assume that whitespace is read ahead*/
-		if(cbuf == '\r'){
+		if(pre_cbuf == '\r'){
 			pre_cbuf = 0;
 			return cbuf;
 		}
