@@ -120,12 +120,12 @@ int formal_parameters(){
     JUDGE(TLPAREN, "'(' is not found");
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
-    CALL(type());
+    CALL(standard_type());
     while(token == TSEMI){
         JUDGE(TSEMI, "Semicolon is not found");
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
-        CALL(type());
+        CALL(standard_type());
     }
     JUDGE(TRPAREN, "')' is not found");
     return(NORMAL);
