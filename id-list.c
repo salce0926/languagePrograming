@@ -1,6 +1,7 @@
 ﻿#include "token-list.h"
 
 extern char *scope_p;
+extern char *temp_id_name;
 extern struct ID *temp_id;
 extern struct TYPE *temp_type;
 extern struct ID *temp_procedure;
@@ -29,43 +30,72 @@ struct ID {
 	int deflinenum;
 	struct LINE *irefp;
 	struct ID *nextp;
-};
+} *globalidroot, *localidroot; /*Pointers to root of global & local symbol tables*/
 
-void push_front_id(struct ID **idroot, struct ID *p){
+int to_ttype(int token){
+	if(token == TINTEGER) return(TPINT);
+	if(token == TBOOLEAN) return(TPBOOL);
+	if(token == TCHAR) return(TPCHAR);
+	return(error("to_ttype error"));
+}
+
+struct ID **get_idroot(){
+	return(scope_p == NULL ? &globalidroot : &localidroot);
+}
+
+int push_front_id(struct ID **idroot, struct ID *p){
 	p->nextp = *idroot;
 	*idroot = p;
+	return(NORMAL);
 }
 
-void push_front_type(struct TYPE **type_root, struct TYPE *p){
+int push_back_id(struct ID **idroot, struct ID *back){
+	struct ID *p;
+	if(*idroot == NULL){
+		*idroot = back;
+		return(NORMAL);
+	}
+	for(p = *idroot; p->nextp != NULL; p = p->nextp);
+	p->nextp = back;
+	return(NORMAL);
+}
+
+int push_front_type(struct TYPE **type_root, struct TYPE *p){
 	p->nextp = *type_root;
 	*type_root = p;
+	return(NORMAL);
 }
 
-void push_back_type(struct TYPE **type_root, struct TYPE *back){
+struct TYPE *pop_front_type(struct TYPE **type_root){
+	struct TYPE *p;
+	p = *type_root;
+	*type_root = (*type_root)->nextp;
+	return(p);
+}
+
+int push_back_type(struct TYPE **type_root, struct TYPE *back){
 	struct TYPE *p;
 	if(*type_root == NULL){
 		*type_root = back;
-		return;
+		return(NORMAL);
 	}
 	for(p = *type_root; p->nextp != NULL; p = p->nextp);
 	p->nextp = back;
+	return(NORMAL);
 }
 
-void push_back_line(struct LINE **line_root, struct LINE *back){
+int push_back_line(struct LINE **line_root, struct LINE *back){
 	struct LINE *p;
 	if(*line_root == NULL){
 		*line_root = back;
-		return;
+		return(NORMAL);
 	}
 	for(p = *line_root; p->nextlinep != NULL; p = p->nextlinep);
 	p->nextlinep = back;
+	return(NORMAL);
 }
 
-void init_tab(void *root) {		/* Initialise the table */
-	root = NULL;
-}
-
-void init_id(struct ID *p){
+int init_id(struct ID *p){
 	p->name = NULL;
 	p->procname = NULL;
 	p->itp = NULL;
@@ -73,19 +103,22 @@ void init_id(struct ID *p){
 	p->deflinenum = -1;
 	p->irefp = NULL;
 	p->nextp = NULL;
+	return(NORMAL);
 }
 
-void init_type(struct TYPE *p){
+int init_type(struct TYPE *p){
 	p->ttype = -1;
 	p->arraysize = -1;
 	p->etp = NULL;
 	p->paratp = NULL;
 	p->nextp = NULL;
+	return(NORMAL);
 }
 
-void init_line(struct LINE *p){
+int init_line(struct LINE *p){
 	p->reflinenum = -1;
 	p->nextlinep = NULL;
+	return(NORMAL);
 }
 
 struct ID *create_newid(){
@@ -128,6 +161,46 @@ char *create_newname(char *np){
 	return(p);
 }
 
+int release_typetab(struct TYPE **type_root){
+	struct TYPE *p, *q;
+
+	for(p = *type_root; p != NULL; p = q){
+		free(p->etp);
+		release_typetab(&(p->paratp));
+		q = p->nextp;
+		free(p);
+	}
+	*type_root = NULL;
+	return(NORMAL);
+}
+
+int release_linetab(struct LINE **line_root){
+	struct LINE *p, *q;
+
+	for(p = *line_root; p != NULL; p = q){
+		q = p->nextlinep;
+		free(p);
+	}
+	
+	*line_root = NULL;
+	return(NORMAL);
+}
+
+int release_idtab(struct ID **id_root) {	/* Release tha data structure */
+	struct ID *p, *q;
+
+	for(p = *id_root; p != NULL; p = q) {
+		free(p->name);
+		free(p->procname);
+		release_typetab(&(p->itp));
+		release_linetab(&(p->irefp));
+		q = p->nextp;
+		free(p);
+	}
+	*id_root = NULL;
+	return(NORMAL);
+}
+
 /* search the name pointed by np */
 struct ID *search_id_byname(struct ID *idroot, char *np) {	
 	struct ID *p;
@@ -138,12 +211,22 @@ struct ID *search_id_byname(struct ID *idroot, char *np) {
 	return(NULL);
 }
 
-void store_id_byname(struct ID **temp_id, char *np){
-	struct ID *p, *idroot;
-	idroot = (scope_p == NULL ? globalidroot : localidroot);
-	if((p = search_id_byname(idroot, np)) != NULL && strcmp(p->procname, scope_p) == 0){
-		error("this ID already exists in same scope\n");
-		return;
+int store_idname(char *temp_id_name, char *np){
+	if(temp_id_name != NULL){
+		/*temp_id_name is unused or not initialised after used it*/
+		return(error("temp_id_name is not initialised\n"));
+	}
+
+	temp_id_name = create_newname(np);
+	return(NORMAL);
+}
+
+int store_id_byname(struct ID **temp_id, char *np){
+	struct ID *p;
+	struct ID **idroot;
+	idroot = get_idroot();
+	if((p = search_id_byname(*idroot, np)) != NULL && strcmp(p->procname, scope_p) == 0){
+		return(error("this ID already exists in same scope\n"));
 	}
 
 	p = create_newid();
@@ -152,98 +235,93 @@ void store_id_byname(struct ID **temp_id, char *np){
 	p->deflinenum = get_linenum();
 
 	push_front_id(temp_id, p);
-	return;
+	return(NORMAL);
 }
 
-void store_standard_type(struct TYPE **temp_type, int ttype){
+int store_standard_type(struct TYPE **temp_type, int ttype){
 	struct TYPE *p = create_newtype();
 
 	p->ttype = ttype;
 
 	push_front_type(temp_type, p);
-	return;
+	return(NORMAL);
 }
 
-void store_array_type(struct TYPE **temp_type, int array_size, int element_type){
+int store_array_type(struct TYPE **temp_type, int array_size){
 	struct TYPE *p = create_newtype();
 
 	p->ttype = TPARRAY;
 	p->arraysize = array_size;
-	p->etp = create_newtype();
-	p->etp->ttype = element_type;
+	p->etp = pop_front_type(temp_type);
 
 	push_front_type(temp_type, p);
-	return;
+	return(NORMAL);
 }
 
-void store_procedure_type(struct TYPE **temp_type){
+int store_procedure_type(struct TYPE **temp_type){
 	struct TYPE *p = create_newtype();
 
 	p->ttype = TPPROC;
 
 	push_front_type(temp_type, p);
-	return;
+	return(NORMAL);
 }
 
-void register_id_bytype(struct ID **idroot, struct ID **temp_id, struct TYPE *temp_type){
+int register_id_bytype(struct ID *temp_id, struct TYPE *temp_type){
 	struct ID *p;
-	for(p = *temp_id; p != NULL; p = p->nextp){
+	struct ID **idroot = get_idroot();
+	for(p = temp_id; p != NULL; p = p->nextp){
 		p->itp = create_newtype();
 		*(p->itp) = *temp_type;
 	}
-	for(p = *temp_id; p->nextp != NULL; p = p->nextp);
-	p->nextp = *idroot;
-	*idroot = *temp_id;
-	return;
+	push_back_id(idroot, temp_id);
+	return(NORMAL);
 }
 
-void register_procedure_parameter(struct ID *temp_procedure, int ttype){
+int register_procedure_parameter(struct ID *temp_procedure, int ttype){
 	struct TYPE *p = create_newtype();
 	
 	p->ttype = ttype;
 
 	push_back_type(&(temp_procedure->itp->paratp), p);
-	return;
+	return(NORMAL);
 }
 
-void store_argument(struct TYPE **temp_argument, int ttype){
+int store_argument(struct TYPE **temp_argument, int ttype){
 	struct TYPE *p = create_newtype();
 
 	p->ttype = ttype;
 
 	push_back_type(temp_argument, p);
-	return;
+	return(NORMAL);
 }
 
-void check_argument(struct ID *temp_procedure, struct TYPE *temp_argument){
+int check_argument(struct ID *temp_procedure, struct TYPE **temp_argument){
 	struct TYPE *parameter = temp_procedure->itp->paratp;
-	struct TYPE *argument = temp_argument;
+	struct TYPE *argument = *temp_argument;
 	while(parameter != NULL && argument != NULL){
 		if(parameter == NULL || argument == NULL){
-			error("the number of the argument does not match the number of the parameter\n");
-			return;
+			return(error("the number of the argument does not match the number of the parameter\n"));
 		}
 		if(parameter->ttype != argument->ttype){
-			error("the type of the argument does not match the difinition of the parameter\n");
-			return;
+			return(error("the type of the argument does not match the difinition of the parameter\n"));
 		}
 
 		parameter = parameter->nextp;
 		argument = argument->nextp;
 	}
 	release_typetab(temp_argument); 
-	return;
+	return(NORMAL);
 }
 
-void check_newid(char *np){
-	struct ID *p, *idroot;
+int check_newid(char *np){
+	struct ID *p, **idroot;
 	struct LINE *l;
 	
-	idroot = (scope_p == NULL ? globalidroot : localidroot);
+	idroot = get_idroot();
 
-	if((p = search_id_byname(idroot, np)) == NULL){
-		error("the difinition of this identifier is not found");
-		return;
+	if((p = search_id_byname(*idroot, np)) == NULL){
+		return(error("the difinition of this identifier is not found"));
 	}
 
 	l = create_newline();
@@ -251,7 +329,7 @@ void check_newid(char *np){
 	l->reflinenum = get_linenum();
 
 	push_back_line(&(p->irefp), l);
-	return;
+	return(NORMAL);
 }
 
 /*
@@ -278,7 +356,7 @@ void id_countup(char *np) {
 }
 */
 
-void print_idtab(struct ID *idroot) {	/* Output the registered data */
+int print_idtab(struct ID *idroot) {	/* Output the registered data */
 	struct ID *p;
 	struct TYPE *q;
 	struct LINE *r;
@@ -305,13 +383,13 @@ void print_idtab(struct ID *idroot) {	/* Output the registered data */
 			printf("%*s", -name_length, "Name");
 		}else{
 			printf("%s", p->name);
-			printf(":%*s", -(name_length - strlen(p->name) + 1), p->procname);
+			printf(":%*s", -(name_length - (int)strlen(p->name) + 1), p->procname);
 		}
 
 		if(p->itp->ttype == TPINT || p->itp->ttype == TPCHAR || p->itp->ttype == TPBOOL){
 			printf("%*s", -type_length, type_str[p->itp->ttype]);
 		}else if(p->itp->ttype == TPARRAY){
-			printf("array [%3d] of %*s", -(type_length - strlen("array [100] of ")), type_str[p->itp->ttype]);
+			printf("array [%3d] of %*s", p->itp->arraysize, -(type_length - (int)strlen("array [100] of ")), type_str[p->itp->ttype]);
 		}else if(p->itp->ttype == TPPROC){
 			if(p->itp->paratp == NULL){
 				printf("%*s", -type_length, type_str[TPPROC]);
@@ -343,42 +421,5 @@ void print_idtab(struct ID *idroot) {	/* Output the registered data */
 	}
 
 	printf("--------------------------------------------------------------------------\n");
-}
-
-void release_idtab(struct ID *id_root) {	/* Release tha data structure */
-	struct ID *p, *q;
-
-	for(p = id_root; p != NULL; p = q) {
-		free(p->name);
-		free(p->procname);
-		release_typetab(p->itp);
-		release_linetab(p->irefp);
-		q = p->nextp;
-		free(p);
-	}
-	init_tab(id_root);
-}
-
-void release_typetab(struct TYPE *type_root){
-	struct TYPE *p, *q;
-
-	for(p = type_root; p != NULL; p = q){
-		free(p->etp);
-		release_typetab(p->paratp);
-		q = p->nextp;
-		free(p);
-	}
-	init_tab(type_root);
-	return;
-}
-
-void release_linetab(struct LINE *line_root){
-	struct LINE *p, *q;
-
-	for(p = line_root; p != NULL; p = q){
-		q = p->nextlinep;
-		free(p);
-	}
-	
-	init_tab(line_root);
+	return(NORMAL);
 }

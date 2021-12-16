@@ -1,18 +1,29 @@
 #include "token-list.h"
 
-#define NORMAL 0
-#define ERROR 1
-
 #define CALL(function) if(function == ERROR) return(ERROR)
 #define JUDGE(code, string) if(token != code) return(error(string));prettyPrint(token);token = scan()
 
 int token;
+char *scope_p = NULL;
+
+char *temp_id_name;
+struct ID *temp_id;
+struct TYPE *temp_type;
+struct ID *temp_procedure;
+struct ID *globalidroot;
+struct ID *localidroot;
+
 static int is_line_head = 1;
 static int indent_count = 0;
 static int in_while = 0;
 
 extern char *tokenstr[NUMOFTOKEN+1];
 extern char string_attr[MAXSTRSIZE];
+
+void init_parse(){
+    globalidroot = NULL;
+    localidroot = NULL;
+}
 
 int parse_program() {
     JUDGE(TPROGRAM, "Keyword 'program' is not found");
@@ -51,15 +62,18 @@ int variable_declaration(){
 
 int variable_names(){
     CALL(variable_name());
+    CALL(store_id_byname(&temp_id, temp_id_name));
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(variable_name());
+        CALL(store_id_byname(&temp_id, temp_id_name));  
     }
     return(NORMAL);
 }
 
 int variable_name(){
     JUDGE(TNAME, "Variable name is not found");
+    CALL(store_idname(temp_id_name, string_attr));
     return(NORMAL);
 }
 
@@ -71,6 +85,7 @@ int type(){
         CALL(array_type());
     }
     else return(error("Type is not found"));
+    CALL(register_id_bytype(&temp_id, temp_type));
     return(NORMAL);
 }
 
@@ -85,6 +100,7 @@ int standard_type(){
         }
     }
     else return(error("Standard type is not found"));
+    CALL(store_standard_type(&temp_type, to_ttype(token)));
     return(NORMAL);
 }
 
@@ -95,6 +111,7 @@ int array_type(){
     JUDGE(TRSQPAREN, "']' is not found");
     JUDGE(TOF, "Keyword 'of' is not found");
     CALL(standard_type());
+    CALL(store_array_type(&temp_type, num_attr));
     return(NORMAL);
 }
 
