@@ -134,7 +134,7 @@ extern void prettyPrint(int);
 #define TPARRAYBOOL	7
 #define TPPROC	8
 
-extern struct TYPE {
+struct TYPE {
 	int ttype;
 	int arraysize;
 	struct TYPE *etp;
@@ -142,12 +142,12 @@ extern struct TYPE {
 	struct TYPE *nextp;
 };
 
-extern struct LINE {
+struct LINE {
 	int reflinenum;
 	struct LINE *nextlinep;
 };
 
-extern struct ID {
+struct ID {
 	char *name;
 	char *procname; /*procedure name within which this name is defined*//*NULL if global name*/
 	struct TYPE *itp;
@@ -169,7 +169,7 @@ extern int push_back_id(struct ID **idroot, struct ID *back);
 extern struct TYPE *pop_front_type(struct TYPE **type_root);
 extern int push_back_type(struct TYPE **type_root, struct TYPE *back);
 /*extern int push_back_line(struct LINE **line_root, struct LINE *back);*/
-extern int check_operand_type(struct TYPE *temp_type);
+extern int check_operand_type(struct TYPE **temp_type);
 extern int init_id(struct ID *p);
 extern int init_type(struct TYPE *p);
 /*extern int init_line(struct LINE *p);*/
@@ -182,7 +182,6 @@ extern int release_linetab(struct LINE **line_root);
 extern int release_idtab(struct ID **id_root);
 extern struct ID *search_id_byname(struct ID *idroot, char *np);
 extern int store_idname(char *temp_id_name, char *np);
-
 extern int store_id_byname(struct ID **temp_id, char *np);
 extern int store_standard_type(struct TYPE **temp_type, int ttype);
 extern int store_array_type(struct TYPE **temp_type, int array_size);

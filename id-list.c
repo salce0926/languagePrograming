@@ -6,32 +6,9 @@ extern struct ID *temp_id;
 extern struct TYPE *temp_type;
 extern struct ID *temp_procedure;
 extern struct TYPE *temp_argument;
-/*extern struct ID *globalidroot;
-extern struct ID *localidroot;*/
+extern struct ID *globalidroot;
+extern struct ID *localidroot;
 extern int error(char *mes);
-
-struct TYPE {
-	int ttype;
-	int arraysize;/*size of array, if TPARRAY*/
-	/*struct TYPE *etp;/*pointer to element type if TPARRAY*/
-	struct TYPE *paratp;/*pointer to parameter's type list if ttype is TPPROC*/
-	struct TYPE *nextp;/*pointer to next parameter's type*/
-};
-
-struct LINE {
-	int reflinenum;
-	struct LINE *nextlinep;
-};
-
-struct ID {
-	char *name;
-	char *procname; /*procedure name within which this name is defined*//*NULL if global name*/
-	struct TYPE *itp;
-	int ispara; /*1:formal parameter, 0:else(variable)*/
-	int deflinenum;
-	struct LINE *irefp;
-	struct ID *nextp;
-} *globalidroot, *localidroot; /*Pointers to root of global & local symbol tables*/
 
 int to_ttype(int token){
 	if(token == TINTEGER) return(TPINT);
@@ -102,9 +79,9 @@ int push_back_line(struct LINE **line_root, struct LINE *back){
 	return(NORMAL);
 }
 
-int check_operand_type(struct TYPE *temp_type){
+int check_operand_type(struct TYPE **temp_type){
 	struct TYPE *p = pop_front_type(temp_type);
-    if(p->ttype != temp_type->ttype){
+    if(p->ttype != (*temp_type)->ttype){
         return(error("the type of operand does not match\n"));
     }
     free(&p);

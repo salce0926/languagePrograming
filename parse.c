@@ -233,9 +233,10 @@ int exit_statement(){
 }
 
 int call_statement(){
+    struct ID *proc;
     JUDGE(TCALL, "Keyword 'call' is not found");
     CALL(procedure_name());
-    struct ID *proc = search_id_byname(globalidroot, temp_id_name);
+    proc = search_id_byname(globalidroot, temp_id_name);
     if(proc == NULL){
         return(error("this procedure is not found\n"));
     }
@@ -259,13 +260,14 @@ int call_statement(){
 }
 
 int expressions(){
+    struct TYPE *p;
     CALL(expression());
-    struct TYPE *p = pop_front_type(temp_type);
+    p = pop_front_type(&temp_type);
     CALL(store_argument(&temp_argument, p->ttype));
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(expression());
-        p = pop_front_type(temp_type);
+        p = pop_front_type(&temp_type);
         CALL(store_argument(&temp_argument, p->ttype));
     }
     return(NORMAL);
@@ -280,7 +282,7 @@ int assignment_statement(){
     CALL(left_part());
     JUDGE(TASSIGN, "':=' is not found");
     CALL(expression());
-    CALL(check_operand_type(temp_type));
+    CALL(check_operand_type(&temp_type));
     return(NORMAL);
 }
 
@@ -290,16 +292,18 @@ int left_part(){
 }
 
 int variable(){
+    struct ID *list, *p;
+    struct TYPE *q;
     CALL(variable_name());
-    struct ID *list = *get_idroot();
-    struct ID *p = search_id_byname(list, temp_id_name);
+    list = *get_idroot();
+    p = search_id_byname(list, temp_id_name);
     if(scope_p != NULL && p == NULL){
         p = search_id_byname(globalidroot, temp_id_name);
     }
     if(p == NULL || p->itp->ttype == TPPROC) return(error("this variable name is undifined\n"));
-    CALL(store_standard_type(temp_type, p->itp->ttype));
+    CALL(store_standard_type(&temp_type, p->itp->ttype));
     if(is_array(p->itp)){
-        CALL(store_array_type(temp_type, p->itp->arraysize));
+        CALL(store_array_type(&temp_type, p->itp->arraysize));
     }
     CALL(ref_newid(p));
     if(token != TLSQPAREN) return(NORMAL);
@@ -308,7 +312,7 @@ int variable(){
     }
     JUDGE(TLSQPAREN, "'[' is not found");
     CALL(expression());
-    struct TYPE *q = pop_front_type(temp_type);
+    q = pop_front_type(&temp_type);
     if(q->ttype != TPINT) return(error("the type of index must be integer\n"));
     free(q);
     q = NULL;
@@ -318,15 +322,16 @@ int variable(){
 }
 
 int expression(){
+    struct TYPE *p;
     CALL(simple_expression());
     while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
         CALL(relational_operator());
         CALL(simple_expression());
-        CALL(check_operand_type(temp_type));
-        struct TYPE *p = pop_front_type(temp_type);
-        free(&p);
+        CALL(check_operand_type(&temp_type));
+        p = pop_front_type(&temp_type);
+        free(p);
         p = NULL;
-        CALL(store_standard_type(temp_type, TPBOOL));
+        CALL(store_standard_type(&temp_type, TPBOOL));
     }
     return(NORMAL);
 }
@@ -338,14 +343,14 @@ int simple_expression(){
         }else if(token == TMINUS){
             JUDGE(TMINUS, "'-' is not found");
         }
-        CALL(store_standard_type(temp_type, TPINT));
+        CALL(store_standard_type(&temp_type, TPINT));
     }
     CALL(term());
-    CALL(check_operand_type(temp_type));
+    CALL(check_operand_type(&temp_type));
     while(token == TPLUS || token == TMINUS || token == TOR){
         CALL(additive_operator());
         CALL(term());
-        CALL(check_operand_type(temp_type));
+        CALL(check_operand_type(&temp_type));
     }
     return(NORMAL);
 }
@@ -355,12 +360,13 @@ int term(){
     while(token == TSTAR || token == TDIV || token == TAND){
         CALL(multiplicative_operator());
         CALL(factor());
-        CALL(check_operand_type(temp_type));
+        CALL(check_operand_type(&temp_type));
     }
     return(NORMAL);
 }
 
 int factor(){
+    struct TYPE *p;
     if(token == TNAME){
         CALL(variable());
     }
@@ -384,7 +390,7 @@ int factor(){
         JUDGE(TLPAREN, "'(' is not found");
         CALL(expression());
         JUDGE(TRPAREN, "')' is not found");
-        struct TYPE *p = pop_front_type(temp_type);
+        p = pop_front_type(&temp_type);
         if(is_array(p)) return(error("using array type as standard type is not allowed\n"));
         release_typetab(&p);
     }
@@ -396,17 +402,17 @@ int constant(){
     if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         if(token == TNUMBER){
             JUDGE(TNUMBER, "Number is not found");
-            CALL(store_standard_type(temp_type, TPINT));
+            CALL(store_standard_type(&temp_type, TPINT));
         }else if(token == TFALSE){
             JUDGE(TFALSE, "Keyword 'false' is not found");
-            CALL(store_standard_type(temp_type, TPBOOL));
+            CALL(store_standard_type(&temp_type, TPBOOL));
         }else if(token == TTRUE){
             JUDGE(TTRUE, "Keyword 'true' is not found");
-            CALL(store_standard_type(temp_type, TPBOOL));
+            CALL(store_standard_type(&temp_type, TPBOOL));
         }else if(token == TSTRING){
             JUDGE(TSTRING, "String is not found");
             if(strlen(string_attr) != 1) return(error("the length of the string must be 1\n"));
-            CALL(store_standard_type(temp_type, TPCHAR));
+            CALL(store_standard_type(&temp_type, TPCHAR));
         }
     }
     return(NORMAL);
