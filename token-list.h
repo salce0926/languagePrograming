@@ -134,7 +134,6 @@ extern void prettyPrint(int);
 #define TPARRAYBOOL	7
 #define TPPROC	8
 
-/*
 extern struct TYPE {
 	int ttype;
 	int arraysize;
@@ -147,18 +146,30 @@ extern struct LINE {
 	int reflinenum;
 	struct LINE *nextlinep;
 };
-*/
+
+extern struct ID {
+	char *name;
+	char *procname; /*procedure name within which this name is defined*//*NULL if global name*/
+	struct TYPE *itp;
+	int ispara; /*1:formal parameter, 0:else(variable)*/
+	int deflinenum;
+	struct LINE *irefp;
+	struct ID *nextp;
+}; /*Pointers to root of global & local symbol tables*/
 
 extern struct ID *globalidroot, *localidroot; /*Pointers to root of global & local symbol tables*/
 
 extern int to_ttype(int token);
+
+extern int is_array(struct TYPE *p);
+extern struct ID **get_idroot();
 extern int push_front_id(struct ID **idroot, struct ID *p);
 extern int push_back_id(struct ID **idroot, struct ID *back);
 /*extern int push_front_type(struct TYPE **type_root, struct TYPE *p);*/
 extern struct TYPE *pop_front_type(struct TYPE **type_root);
 extern int push_back_type(struct TYPE **type_root, struct TYPE *back);
 /*extern int push_back_line(struct LINE **line_root, struct LINE *back);*/
-extern int init_tab(void **root);
+extern int check_operand_type(struct TYPE *temp_type);
 extern int init_id(struct ID *p);
 extern int init_type(struct TYPE *p);
 /*extern int init_line(struct LINE *p);*/
@@ -171,13 +182,15 @@ extern int release_linetab(struct LINE **line_root);
 extern int release_idtab(struct ID **id_root);
 extern struct ID *search_id_byname(struct ID *idroot, char *np);
 extern int store_idname(char *temp_id_name, char *np);
+
 extern int store_id_byname(struct ID **temp_id, char *np);
 extern int store_standard_type(struct TYPE **temp_type, int ttype);
 extern int store_array_type(struct TYPE **temp_type, int array_size);
 extern int store_procedure_type(struct TYPE **temp_type);
 extern int register_id_bytype(struct ID *temp_id, struct TYPE *temp_type);
+extern int register_parameter_bytype(struct ID *temp_id, struct ID *temp_procedure, struct TYPE *temp_type);
 extern int register_procedure_parameter(struct ID *temp_procedure, int ttype);
 extern int store_argument(struct TYPE **temp_argument, int ttype);
 extern int check_argument(struct ID *temp_procedure, struct TYPE **temp_argument);
-extern int check_newid(char *np);
+extern int ref_newid(struct ID *p);
 extern int print_idtab(struct ID *idroot);

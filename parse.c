@@ -10,6 +10,7 @@ char *temp_id_name;
 struct ID *temp_id;
 struct TYPE *temp_type;
 struct ID *temp_procedure;
+struct TYPE *temp_argument;
 struct ID *globalidroot;
 struct ID *localidroot;
 
@@ -50,11 +51,13 @@ int variable_declaration(){
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     CALL(type());
+    CALL(register_id_bytype(temp_id, temp_type));
     JUDGE(TSEMI, "Semicolon is not found");
     while(token == TNAME){
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(type());
+        CALL(register_id_bytype(temp_id, temp_type));
         JUDGE(TSEMI, "Semicolon is not found");
     }
     return(NORMAL);
@@ -85,7 +88,6 @@ int type(){
         CALL(array_type());
     }
     else return(error("Type is not found"));
-    CALL(register_id_bytype(&temp_id, temp_type));
     return(NORMAL);
 }
 
@@ -119,12 +121,16 @@ int subprogram_declaration(){
     indent_count = 1;
     JUDGE(TPROCEDURE, "Keyword 'procedure' is not found");
     CALL(procedure_name());
+    CALL(store_id_byname(&temp_procedure, string_attr));
+    scope_p = create_newname(string_attr);
     if(token == TLPAREN) CALL(formal_parameters());
     JUDGE(TSEMI, "Semicolon is not found");
     if(token == TVAR) CALL(variable_declaration());
     indent_count = 1;
     CALL(compound_statement());
     JUDGE(TSEMI, "Semicolon is not found");
+    free(scope_p);
+    scope_p = NULL;
     return(NORMAL);
 }
 
@@ -138,11 +144,13 @@ int formal_parameters(){
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     CALL(standard_type());
+    CALL(register_parameter_bytype(temp_id, temp_procedure, temp_type));
     while(token == TSEMI){
         JUDGE(TSEMI, "Semicolon is not found");
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(standard_type());
+        CALL(register_parameter_bytype(temp_id, temp_procedure, temp_type));
     }
     JUDGE(TRPAREN, "')' is not found");
     return(NORMAL);
@@ -198,6 +206,7 @@ int statement(){
 int condition_statement(){
     JUDGE(TIF, "Keyword 'if' is not found");
     CALL(expression());
+    if(temp_type->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
     JUDGE(TTHEN, "Keyword 'then' is not found");
     CALL(statement());
     if(token != TELSE) return(NORMAL);
@@ -210,6 +219,7 @@ int iteration_statement(){
     in_while++;
     JUDGE(TWHILE, "Keyword 'while' is not found");
     CALL(expression());
+    if(temp_type->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
     JUDGE(TDO, "Keyword 'do' is not found");
     CALL(statement());
     in_while--;
@@ -225,18 +235,38 @@ int exit_statement(){
 int call_statement(){
     JUDGE(TCALL, "Keyword 'call' is not found");
     CALL(procedure_name());
+    struct ID *proc = search_id_byname(globalidroot, temp_id_name);
+    if(proc == NULL){
+        return(error("this procedure is not found\n"));
+    }
+    if(proc->itp->ttype != TPPROC){
+        return(error("this id is not defined as procedure\n"));
+    }
+    if(strcmp(proc->name, scope_p) == 0){
+        return(error("recursive calls are not allowed\n"));
+    }
+    if(token != TLPAREN){
+        CALL(check_argument(temp_procedure, &temp_argument));
+        return(NORMAL);
+    }
     if(token != TLPAREN) return(NORMAL);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(expressions());
     JUDGE(TRPAREN, "')' is not found");
+    CALL(check_argument(temp_procedure, &temp_argument));
+    CALL(ref_newid(proc));
     return(NORMAL);
 }
 
 int expressions(){
     CALL(expression());
+    struct TYPE *p = pop_front_type(temp_type);
+    CALL(store_argument(&temp_argument, p->ttype));
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(expression());
+        p = pop_front_type(temp_type);
+        CALL(store_argument(&temp_argument, p->ttype));
     }
     return(NORMAL);
 }
@@ -250,6 +280,7 @@ int assignment_statement(){
     CALL(left_part());
     JUDGE(TASSIGN, "':=' is not found");
     CALL(expression());
+    CALL(check_operand_type(temp_type));
     return(NORMAL);
 }
 
@@ -260,10 +291,29 @@ int left_part(){
 
 int variable(){
     CALL(variable_name());
+    struct ID *list = *get_idroot();
+    struct ID *p = search_id_byname(list, temp_id_name);
+    if(scope_p != NULL && p == NULL){
+        p = search_id_byname(globalidroot, temp_id_name);
+    }
+    if(p == NULL || p->itp->ttype == TPPROC) return(error("this variable name is undifined\n"));
+    CALL(store_standard_type(temp_type, p->itp->ttype));
+    if(is_array(p->itp)){
+        CALL(store_array_type(temp_type, p->itp->arraysize));
+    }
+    CALL(ref_newid(p));
     if(token != TLSQPAREN) return(NORMAL);
+    if(!is_array(p->itp)){
+        return(error("the type of this id must be array\n"));
+    }
     JUDGE(TLSQPAREN, "'[' is not found");
     CALL(expression());
+    struct TYPE *q = pop_front_type(temp_type);
+    if(q->ttype != TPINT) return(error("the type of index must be integer\n"));
+    free(q);
+    q = NULL;
     JUDGE(TRSQPAREN, "']' is not found");
+    p->itp->arraysize = -1;
     return(NORMAL);
 }
 
@@ -272,6 +322,11 @@ int expression(){
     while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
         CALL(relational_operator());
         CALL(simple_expression());
+        CALL(check_operand_type(temp_type));
+        struct TYPE *p = pop_front_type(temp_type);
+        free(&p);
+        p = NULL;
+        CALL(store_standard_type(temp_type, TPBOOL));
     }
     return(NORMAL);
 }
@@ -283,11 +338,14 @@ int simple_expression(){
         }else if(token == TMINUS){
             JUDGE(TMINUS, "'-' is not found");
         }
+        CALL(store_standard_type(temp_type, TPINT));
     }
     CALL(term());
+    CALL(check_operand_type(temp_type));
     while(token == TPLUS || token == TMINUS || token == TOR){
         CALL(additive_operator());
         CALL(term());
+        CALL(check_operand_type(temp_type));
     }
     return(NORMAL);
 }
@@ -297,6 +355,7 @@ int term(){
     while(token == TSTAR || token == TDIV || token == TAND){
         CALL(multiplicative_operator());
         CALL(factor());
+        CALL(check_operand_type(temp_type));
     }
     return(NORMAL);
 }
@@ -316,12 +375,18 @@ int factor(){
     else if(token == TNOT){
         JUDGE(TNOT, "Keyword 'not' is not found");
         CALL(factor());
+        if(temp_type->ttype != TPBOOL){
+            return(error("unsupported operand type for 'not'\n"));
+        }
     }
     else if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
         CALL(standard_type());
         JUDGE(TLPAREN, "'(' is not found");
         CALL(expression());
         JUDGE(TRPAREN, "')' is not found");
+        struct TYPE *p = pop_front_type(temp_type);
+        if(is_array(p)) return(error("using array type as standard type is not allowed\n"));
+        release_typetab(&p);
     }
     else return(error("Factor is not found"));
     return(NORMAL);
@@ -331,12 +396,17 @@ int constant(){
     if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         if(token == TNUMBER){
             JUDGE(TNUMBER, "Number is not found");
+            CALL(store_standard_type(temp_type, TPINT));
         }else if(token == TFALSE){
             JUDGE(TFALSE, "Keyword 'false' is not found");
+            CALL(store_standard_type(temp_type, TPBOOL));
         }else if(token == TTRUE){
             JUDGE(TTRUE, "Keyword 'true' is not found");
+            CALL(store_standard_type(temp_type, TPBOOL));
         }else if(token == TSTRING){
             JUDGE(TSTRING, "String is not found");
+            if(strlen(string_attr) != 1) return(error("the length of the string must be 1\n"));
+            CALL(store_standard_type(temp_type, TPCHAR));
         }
     }
     return(NORMAL);
@@ -346,10 +416,19 @@ int multiplicative_operator(){
     if(token == TSTAR || token == TDIV || token == TAND){
         if(token == TSTAR){
             JUDGE(TSTAR, "'*' is not found");
+            if(temp_type->ttype != TPINT){
+                return(error("unsupported operand type for '*'\n"));
+            }
         }else if(token == TDIV){
             JUDGE(TDIV, "Keyword 'div' is not found");
+            if(temp_type->ttype != TPINT){
+                return(error("unsupported operand type for 'div'\n"));
+            }
         }else if(token == TAND){
             JUDGE(TAND, "Keyword 'and' is not found");
+            if(temp_type->ttype != TPBOOL){
+                return(error("unsupported operand type for 'and'\n"));
+            }
         }
     }
     return(NORMAL);
@@ -359,10 +438,19 @@ int additive_operator(){
     if(token == TPLUS || token == TMINUS || token == TOR){
         if(token == TPLUS){
             JUDGE(TPLUS, "'+' is not found");
+            if(temp_type->ttype != TPINT){
+                return(error("unsupported operand type for '+'\n"));
+            }
         }else if(token == TMINUS){
             JUDGE(TMINUS, "'-' is not found");
+            if(temp_type->ttype != TPINT){
+                return(error("unsupported operand type for '-'\n"));
+            }
         }else if(token == TOR){
             JUDGE(TOR, "Keyword 'or' is not found");
+            if(temp_type->ttype != TPBOOL){
+                return(error("unsupported operand type for 'or'\n"));
+            }
         }
     }
     return(NORMAL);
@@ -426,6 +514,7 @@ int output_statement(){
 }
 
 int output_format(){
+    if(token == TSTRING) return(NORMAL);
     CALL(expression());
     if(token != TCOLON) return(NORMAL);
     JUDGE(TCOLON, "Colon is not found");

@@ -5,14 +5,15 @@ extern char *temp_id_name;
 extern struct ID *temp_id;
 extern struct TYPE *temp_type;
 extern struct ID *temp_procedure;
-extern struct ID *globalidroot;
-extern struct ID *localidroot;
+extern struct TYPE *temp_argument;
+/*extern struct ID *globalidroot;
+extern struct ID *localidroot;*/
 extern int error(char *mes);
 
 struct TYPE {
 	int ttype;
 	int arraysize;/*size of array, if TPARRAY*/
-	struct TYPE *etp;/*pointer to element type if TPARRAY*/
+	/*struct TYPE *etp;/*pointer to element type if TPARRAY*/
 	struct TYPE *paratp;/*pointer to parameter's type list if ttype is TPPROC*/
 	struct TYPE *nextp;/*pointer to next parameter's type*/
 };
@@ -37,6 +38,11 @@ int to_ttype(int token){
 	if(token == TBOOLEAN) return(TPBOOL);
 	if(token == TCHAR) return(TPCHAR);
 	return(error("to_ttype error"));
+}
+
+int is_array(struct TYPE *p){
+	if(p->arraysize > 0) return(1);
+	return(0);
 }
 
 struct ID **get_idroot(){
@@ -70,6 +76,7 @@ struct TYPE *pop_front_type(struct TYPE **type_root){
 	struct TYPE *p;
 	p = *type_root;
 	*type_root = (*type_root)->nextp;
+	p->nextp = NULL;
 	return(p);
 }
 
@@ -95,6 +102,16 @@ int push_back_line(struct LINE **line_root, struct LINE *back){
 	return(NORMAL);
 }
 
+int check_operand_type(struct TYPE *temp_type){
+	struct TYPE *p = pop_front_type(temp_type);
+    if(p->ttype != temp_type->ttype){
+        return(error("the type of operand does not match\n"));
+    }
+    free(&p);
+    p = NULL;
+	return(NORMAL);
+}
+
 int init_id(struct ID *p){
 	p->name = NULL;
 	p->procname = NULL;
@@ -109,7 +126,7 @@ int init_id(struct ID *p){
 int init_type(struct TYPE *p){
 	p->ttype = -1;
 	p->arraysize = -1;
-	p->etp = NULL;
+	/*p->etp = NULL;*/
 	p->paratp = NULL;
 	p->nextp = NULL;
 	return(NORMAL);
@@ -165,7 +182,7 @@ int release_typetab(struct TYPE **type_root){
 	struct TYPE *p, *q;
 
 	for(p = *type_root; p != NULL; p = q){
-		free(p->etp);
+		/*free(p->etp);*/
 		release_typetab(&(p->paratp));
 		q = p->nextp;
 		free(p);
@@ -248,11 +265,9 @@ int store_standard_type(struct TYPE **temp_type, int ttype){
 }
 
 int store_array_type(struct TYPE **temp_type, int array_size){
-	struct TYPE *p = create_newtype();
+	struct TYPE *p = pop_front_type(temp_type);
 
-	p->ttype = TPARRAY;
 	p->arraysize = array_size;
-	p->etp = pop_front_type(temp_type);
 
 	push_front_type(temp_type, p);
 	return(NORMAL);
@@ -263,7 +278,7 @@ int store_procedure_type(struct TYPE **temp_type){
 
 	p->ttype = TPPROC;
 
-	push_front_type(temp_type, p);
+	push_back_type(temp_type, p);
 	return(NORMAL);
 }
 
@@ -284,6 +299,18 @@ int register_procedure_parameter(struct ID *temp_procedure, int ttype){
 	p->ttype = ttype;
 
 	push_back_type(&(temp_procedure->itp->paratp), p);
+	return(NORMAL);
+}
+
+int register_parameter_bytype(struct ID *temp_id, struct ID *temp_procedure, struct TYPE *temp_type){
+	struct ID *p;
+	struct ID **idroot = get_idroot();
+	for(p = temp_id; p != NULL; p = p->nextp){
+		p->itp = create_newtype();
+		*(p->itp) = *temp_type;
+		register_procedure_parameter(temp_procedure, temp_type->ttype);
+	}
+	push_back_id(idroot, temp_id);
 	return(NORMAL);
 }
 
@@ -314,17 +341,8 @@ int check_argument(struct ID *temp_procedure, struct TYPE **temp_argument){
 	return(NORMAL);
 }
 
-int check_newid(char *np){
-	struct ID *p, **idroot;
-	struct LINE *l;
-	
-	idroot = get_idroot();
-
-	if((p = search_id_byname(*idroot, np)) == NULL){
-		return(error("the difinition of this identifier is not found"));
-	}
-
-	l = create_newline();
+int ref_newid(struct ID *p){
+	struct LINE *l = create_newline();
 
 	l->reflinenum = get_linenum();
 
