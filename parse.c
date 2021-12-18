@@ -6,13 +6,13 @@
 int token;
 char *scope_p = NULL;
 
-char *temp_id_name;
-struct ID *temp_id;
-struct TYPE *temp_type;
-struct ID *temp_procedure;
-struct TYPE *temp_argument;
-struct ID *globalidroot;
-struct ID *localidroot;
+char *temp_id_name = NULL;
+struct ID *temp_id = NULL;
+struct TYPE *temp_type = NULL;
+struct ID *temp_procedure = NULL;
+struct TYPE *temp_argument = NULL;
+struct ID *globalidroot = NULL;
+struct ID *localidroot = NULL;
 
 static int is_line_head = 1;
 static int indent_count = 0;
@@ -21,12 +21,16 @@ static int in_while = 0;
 extern char *tokenstr[NUMOFTOKEN+1];
 extern char string_attr[MAXSTRSIZE];
 
+int is_debugmode = 0;
+
 void init_parse(){
+    if(is_debugmode) printf("%s\n", __func__);
     globalidroot = NULL;
     localidroot = NULL;
 }
 
 int parse_program() {
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TPROGRAM, "Keyword 'program' is not found");
     JUDGE(TNAME, "Program name is not found");
     JUDGE(TSEMI, "Semicolon is not found");
@@ -36,6 +40,7 @@ int parse_program() {
 }
 
 int block(){
+    if(is_debugmode) printf("%s\n", __func__);
     while(token == TVAR || token == TPROCEDURE){
         if(token == TVAR) CALL(variable_declaration());
         if(token == TPROCEDURE) CALL(subprogram_declaration());
@@ -46,41 +51,54 @@ int block(){
 }
 
 int variable_declaration(){
+    if(is_debugmode) printf("%s\n", __func__);
     indent_count = 1;
     JUDGE(TVAR, "Keyword 'var' is not found");
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     CALL(type());
     CALL(register_id_bytype(temp_id, temp_type));
+    temp_id = NULL;
+    temp_type = NULL;
     JUDGE(TSEMI, "Semicolon is not found");
     while(token == TNAME){
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(type());
         CALL(register_id_bytype(temp_id, temp_type));
+        temp_id = NULL;
+        temp_type = NULL;
         JUDGE(TSEMI, "Semicolon is not found");
     }
     return(NORMAL);
 }
 
 int variable_names(){
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(variable_name());
     CALL(store_id_byname(&temp_id, temp_id_name));
+    free(temp_id_name);
+    temp_id_name = NULL;
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(variable_name());
-        CALL(store_id_byname(&temp_id, temp_id_name));  
+        CALL(store_id_byname(&temp_id, temp_id_name));
+        free(temp_id_name);
+        temp_id_name = NULL;
     }
     return(NORMAL);
 }
 
 int variable_name(){
+    if(is_debugmode) printf("%s\n", __func__);
+    CALL(store_idname(&temp_id_name, string_attr));
     JUDGE(TNAME, "Variable name is not found");
-    CALL(store_idname(temp_id_name, string_attr));
+    string_attr[0] = '\0';/*just in case*/
     return(NORMAL);
 }
 
 int type(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
         CALL(standard_type());
     }
@@ -92,6 +110,8 @@ int type(){
 }
 
 int standard_type(){
+    int type = to_ttype(token);
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
         if(token == TINTEGER){
             JUDGE(TINTEGER, "Keyword 'integer' is not found");
@@ -102,11 +122,12 @@ int standard_type(){
         }
     }
     else return(error("Standard type is not found"));
-    CALL(store_standard_type(&temp_type, to_ttype(token)));
+    CALL(store_standard_type(&temp_type, type));
     return(NORMAL);
 }
 
 int array_type(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TARRAY, "Keyword 'array' is not found");
     JUDGE(TLSQPAREN, "'[' is not found");
     JUDGE(TNUMBER, "Index number is not found");
@@ -118,12 +139,18 @@ int array_type(){
 }
 
 int subprogram_declaration(){
+    if(is_debugmode) printf("%s\n", __func__);
     indent_count = 1;
     JUDGE(TPROCEDURE, "Keyword 'procedure' is not found");
     CALL(procedure_name());
-    CALL(store_id_byname(&temp_procedure, string_attr));
-    scope_p = create_newname(string_attr);
+    CALL(store_id_byname(&temp_procedure, temp_id_name));
+    CALL(store_procedure_type(temp_procedure));
+    scope_p = create_newname(temp_id_name);
+    free(temp_id_name);
+    temp_id_name = NULL;
     if(token == TLPAREN) CALL(formal_parameters());
+    CALL(register_procedure(temp_procedure));
+    temp_procedure = NULL;
     JUDGE(TSEMI, "Semicolon is not found");
     if(token == TVAR) CALL(variable_declaration());
     indent_count = 1;
@@ -135,28 +162,37 @@ int subprogram_declaration(){
 }
 
 int procedure_name(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TNAME, "Procedure name is not found");
+    CALL(store_idname(&temp_id_name, string_attr));
+    string_attr[0] = '\0';/*just in case*/
     return(NORMAL);
 }
 
 int formal_parameters(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     CALL(standard_type());
     CALL(register_parameter_bytype(temp_id, temp_procedure, temp_type));
+    temp_id = NULL;
+    temp_type = NULL;
     while(token == TSEMI){
         JUDGE(TSEMI, "Semicolon is not found");
         CALL(variable_names());
         JUDGE(TCOLON, "Colon is not found");
         CALL(standard_type());
         CALL(register_parameter_bytype(temp_id, temp_procedure, temp_type));
+        temp_id = NULL;
+        temp_type = NULL;
     }
     JUDGE(TRPAREN, "')' is not found");
     return(NORMAL);
 }
 
 int compound_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TBEGIN, "Keyword 'begin' is not found");
     indent_count++;
     CALL(statement());
@@ -170,6 +206,7 @@ int compound_statement(){
 }
 
 int statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TNAME){
         CALL(assignment_statement());
     } 
@@ -204,6 +241,7 @@ int statement(){
 }
 
 int condition_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TIF, "Keyword 'if' is not found");
     CALL(expression());
     if(temp_type->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
@@ -216,6 +254,7 @@ int condition_statement(){
 }
 
 int iteration_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     in_while++;
     JUDGE(TWHILE, "Keyword 'while' is not found");
     CALL(expression());
@@ -227,6 +266,7 @@ int iteration_statement(){
 }
 
 int exit_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(in_while < 1) return(error("Keyword 'break' must be included in at least one iteration sentence."));
     JUDGE(TBREAK, "Keyword 'break' is not found");
     return(NORMAL);
@@ -234,16 +274,19 @@ int exit_statement(){
 
 int call_statement(){
     struct ID *proc;
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TCALL, "Keyword 'call' is not found");
     CALL(procedure_name());
     proc = search_id_byname(globalidroot, temp_id_name);
+    free(temp_id_name);
+    temp_id_name = NULL;
     if(proc == NULL){
         return(error("this procedure is not found\n"));
     }
     if(proc->itp->ttype != TPPROC){
         return(error("this id is not defined as procedure\n"));
     }
-    if(strcmp(proc->name, scope_p) == 0){
+    if(proc->name != NULL && scope_p != NULL && strcmp(proc->name, scope_p) == 0){
         return(error("recursive calls are not allowed\n"));
     }
     if(token != TLPAREN){
@@ -254,39 +297,47 @@ int call_statement(){
     JUDGE(TLPAREN, "'(' is not found");
     CALL(expressions());
     JUDGE(TRPAREN, "')' is not found");
-    CALL(check_argument(temp_procedure, &temp_argument));
+    CALL(check_argument(proc, &temp_argument));
     CALL(ref_newid(proc));
+    release_typetab(&temp_argument);
     return(NORMAL);
 }
 
 int expressions(){
     struct TYPE *p;
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(expression());
     p = pop_front_type(&temp_type);
     CALL(store_argument(&temp_argument, p->ttype));
+    release_typetab(&p);
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(expression());
         p = pop_front_type(&temp_type);
         CALL(store_argument(&temp_argument, p->ttype));
+        release_typetab(&p);
     }
     return(NORMAL);
 }
 
 int return_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     JUDGE(TRETURN, "Keyword 'return' is not found");
     return(NORMAL);
 }
 
 int assignment_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(left_part());
     JUDGE(TASSIGN, "':=' is not found");
     CALL(expression());
     CALL(check_operand_type(&temp_type));
+    temp_type = NULL;
     return(NORMAL);
 }
 
 int left_part(){
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(variable());
     return(NORMAL);
 }
@@ -294,12 +345,15 @@ int left_part(){
 int variable(){
     struct ID *list, *p;
     struct TYPE *q;
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(variable_name());
     list = *get_idroot();
     p = search_id_byname(list, temp_id_name);
     if(scope_p != NULL && p == NULL){
         p = search_id_byname(globalidroot, temp_id_name);
     }
+    free(temp_id_name);
+    temp_id_name = NULL;
     if(p == NULL || p->itp->ttype == TPPROC) return(error("this variable name is undifined\n"));
     CALL(store_standard_type(&temp_type, p->itp->ttype));
     if(is_array(p->itp)){
@@ -314,8 +368,7 @@ int variable(){
     CALL(expression());
     q = pop_front_type(&temp_type);
     if(q->ttype != TPINT) return(error("the type of index must be integer\n"));
-    free(q);
-    q = NULL;
+    release_typetab(&q);
     JUDGE(TRSQPAREN, "']' is not found");
     p->itp->arraysize = -1;
     return(NORMAL);
@@ -323,21 +376,24 @@ int variable(){
 
 int expression(){
     struct TYPE *p;
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(simple_expression());
     while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
         CALL(relational_operator());
         CALL(simple_expression());
         CALL(check_operand_type(&temp_type));
         p = pop_front_type(&temp_type);
-        free(p);
-        p = NULL;
+        release_typetab(&p);
         CALL(store_standard_type(&temp_type, TPBOOL));
     }
     return(NORMAL);
 }
 
 int simple_expression(){
+    int check = 0;
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TPLUS || token == TMINUS){
+        check = 1;
         if(token == TPLUS){
             JUDGE(TPLUS, "'+' is not found");
         }else if(token == TMINUS){
@@ -346,7 +402,9 @@ int simple_expression(){
         CALL(store_standard_type(&temp_type, TPINT));
     }
     CALL(term());
-    CALL(check_operand_type(&temp_type));
+    if(check){
+        CALL(check_operand_type(&temp_type));
+    }
     while(token == TPLUS || token == TMINUS || token == TOR){
         CALL(additive_operator());
         CALL(term());
@@ -356,6 +414,7 @@ int simple_expression(){
 }
 
 int term(){
+    if(is_debugmode) printf("%s\n", __func__);
     CALL(factor());
     while(token == TSTAR || token == TDIV || token == TAND){
         CALL(multiplicative_operator());
@@ -367,6 +426,7 @@ int term(){
 
 int factor(){
     struct TYPE *p;
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TNAME){
         CALL(variable());
     }
@@ -399,6 +459,8 @@ int factor(){
 }
 
 int constant(){
+    int length;
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         if(token == TNUMBER){
             JUDGE(TNUMBER, "Number is not found");
@@ -410,8 +472,9 @@ int constant(){
             JUDGE(TTRUE, "Keyword 'true' is not found");
             CALL(store_standard_type(&temp_type, TPBOOL));
         }else if(token == TSTRING){
+            length = strlen(string_attr);
             JUDGE(TSTRING, "String is not found");
-            if(strlen(string_attr) != 1) return(error("the length of the string must be 1\n"));
+            if(length != 1) return(error("the length of the string must be 1\n"));
             CALL(store_standard_type(&temp_type, TPCHAR));
         }
     }
@@ -419,6 +482,7 @@ int constant(){
 }
 
 int multiplicative_operator(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TSTAR || token == TDIV || token == TAND){
         if(token == TSTAR){
             JUDGE(TSTAR, "'*' is not found");
@@ -441,6 +505,7 @@ int multiplicative_operator(){
 }
 
 int additive_operator(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TPLUS || token == TMINUS || token == TOR){
         if(token == TPLUS){
             JUDGE(TPLUS, "'+' is not found");
@@ -463,6 +528,7 @@ int additive_operator(){
 }
 
 int relational_operator(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ ||token == TGR || token == TGREQ){
         if(token == TEQUAL){
             JUDGE(TEQUAL, "'=' is not found");
@@ -482,6 +548,8 @@ int relational_operator(){
 }
 
 int input_statement(){
+    struct TYPE *p;
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TREAD || token == TREADLN){
         if(token == TREAD){
             JUDGE(TREAD, "Keyword 'read' is not found");
@@ -492,15 +560,22 @@ int input_statement(){
     if(token != TLPAREN) return(NORMAL);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(variable());
+    p = pop_front_type(&temp_type);
+    if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
+    release_typetab(&p);
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         CALL(variable());
+        p = pop_front_type(&temp_type);
+        if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
+        release_typetab(&p);
     }
     JUDGE(TRPAREN, "')' is not found");
     return(NORMAL);
 }
 
 int output_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     if(token == TWRITE || token == TWRITELN){
         if(token == TWRITE){
             JUDGE(TWRITE, "Keyword 'write' is not found");
@@ -520,8 +595,16 @@ int output_statement(){
 }
 
 int output_format(){
-    if(token == TSTRING) return(NORMAL);
+    struct TYPE *p;
+    if(is_debugmode) printf("%s\n", __func__);
+    if(token == TSTRING){
+        JUDGE(TSTRING, "String is not found");
+        return(NORMAL);
+    }
     CALL(expression());
+    p = pop_front_type(&temp_type);
+    if(is_array(p)) return(error("using array type as output format is not allowed\n"));
+    release_typetab(&p);
     if(token != TCOLON) return(NORMAL);
     JUDGE(TCOLON, "Colon is not found");
     JUDGE(TNUMBER, "Number is not found");
@@ -529,10 +612,12 @@ int output_format(){
 }
 
 int empty_statement(){
+    if(is_debugmode) printf("%s\n", __func__);
     return(NORMAL);
 }
 
 void prettyPrint(int token){
+    if(is_debugmode) printf("%s\n", __func__);
     int i;
     if(!is_line_head && (token == TBEGIN || token == TEND || token == TELSE)){
         printf("\n");

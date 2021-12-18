@@ -84,7 +84,7 @@ int check_operand_type(struct TYPE **temp_type){
     if(p->ttype != (*temp_type)->ttype){
         return(error("the type of operand does not match\n"));
     }
-    free(&p);
+    free(p);
     p = NULL;
 	return(NORMAL);
 }
@@ -147,6 +147,10 @@ struct LINE *create_newline(){
 
 char *create_newname(char *np){
 	char *p;
+	if(is_debugmode) printf("%s\n", __func__);
+	if(np == NULL){
+		return(NULL);
+	}
 	if((p = (char *)malloc(strlen(np)+1)) == NULL){
 		printf("can not malloc in create_newname\n");
 		return(NULL);
@@ -198,26 +202,34 @@ int release_idtab(struct ID **id_root) {	/* Release tha data structure */
 /* search the name pointed by np */
 struct ID *search_id_byname(struct ID *idroot, char *np) {	
 	struct ID *p;
+	if(is_debugmode) printf("%s\n", __func__);
+	/*print_idtab(idroot);*/
 
 	for(p = idroot; p != NULL; p = p->nextp) {
-		if(strcmp(np, p->name) == 0) return(p);
+		if(strcmp(np, p->name) == 0){
+			if(scope_p == NULL && p->procname == NULL) return(p);
+			if(strcmp(scope_p, p->procname) == 0) return(p);
+		}
 	}
 	return(NULL);
 }
 
-int store_idname(char *temp_id_name, char *np){
-	if(temp_id_name != NULL){
+int store_idname(char **temp_id_name, char *np){
+	if(is_debugmode) printf("%s\n", __func__);
+	if(*temp_id_name != NULL){
 		/*temp_id_name is unused or not initialised after used it*/
+		printf("NOTE: current temp_id_name value is %s\n", *temp_id_name);
 		return(error("temp_id_name is not initialised\n"));
 	}
 
-	temp_id_name = create_newname(np);
+	*temp_id_name = create_newname(np);
 	return(NORMAL);
 }
 
 int store_id_byname(struct ID **temp_id, char *np){
 	struct ID *p;
 	struct ID **idroot;
+	if(is_debugmode) printf("%s\n", __func__);
 	idroot = get_idroot();
 	if((p = search_id_byname(*idroot, np)) != NULL && strcmp(p->procname, scope_p) == 0){
 		return(error("this ID already exists in same scope\n"));
@@ -234,6 +246,7 @@ int store_id_byname(struct ID **temp_id, char *np){
 
 int store_standard_type(struct TYPE **temp_type, int ttype){
 	struct TYPE *p = create_newtype();
+	if(is_debugmode) printf("%s\n", __func__);
 
 	p->ttype = ttype;
 
@@ -250,12 +263,10 @@ int store_array_type(struct TYPE **temp_type, int array_size){
 	return(NORMAL);
 }
 
-int store_procedure_type(struct TYPE **temp_type){
-	struct TYPE *p = create_newtype();
+int store_procedure_type(struct ID *temp_procedure){
+	temp_procedure->itp = create_newtype();
 
-	p->ttype = TPPROC;
-
-	push_back_type(temp_type, p);
+	temp_procedure->itp->ttype = TPPROC;
 	return(NORMAL);
 }
 
@@ -267,6 +278,11 @@ int register_id_bytype(struct ID *temp_id, struct TYPE *temp_type){
 		*(p->itp) = *temp_type;
 	}
 	push_back_id(idroot, temp_id);
+	return(NORMAL);
+}
+
+int register_procedure(struct ID *temp_procedure){
+	push_back_id(&globalidroot, temp_procedure);
 	return(NORMAL);
 }
 
@@ -285,6 +301,7 @@ int register_parameter_bytype(struct ID *temp_id, struct ID *temp_procedure, str
 	for(p = temp_id; p != NULL; p = p->nextp){
 		p->itp = create_newtype();
 		*(p->itp) = *temp_type;
+		p->ispara = 1;
 		register_procedure_parameter(temp_procedure, temp_type->ttype);
 	}
 	push_back_id(idroot, temp_id);
@@ -300,8 +317,8 @@ int store_argument(struct TYPE **temp_argument, int ttype){
 	return(NORMAL);
 }
 
-int check_argument(struct ID *temp_procedure, struct TYPE **temp_argument){
-	struct TYPE *parameter = temp_procedure->itp->paratp;
+int check_argument(struct ID *procedure, struct TYPE **temp_argument){
+	struct TYPE *parameter = procedure->itp->paratp;
 	struct TYPE *argument = *temp_argument;
 	while(parameter != NULL && argument != NULL){
 		if(parameter == NULL || argument == NULL){
@@ -370,15 +387,15 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 	printf("--------------------------------------------------------------------------\n");
 	printf("%*s", -name_length, "Name");
 	printf("%*s", -type_length, "Type");
-	printf("%*s", define_length, "Def.");
+	printf("%*s", define_length, "Def.|");
 	printf("%*s\n", -reference_length, "Ref.");
 
 	for(p = idroot; p != NULL; p = p->nextp) {
 		if(p->procname == NULL){
-			printf("%*s", -name_length, "Name");
+			printf("%*s", -name_length, p->name);
 		}else{
 			printf("%s", p->name);
-			printf(":%*s", -(name_length - (int)strlen(p->name) + 1), p->procname);
+			printf(":%*s", -(name_length - (int)strlen(p->name) - 1), p->procname);
 		}
 
 		if(p->itp->ttype == TPINT || p->itp->ttype == TPCHAR || p->itp->ttype == TPBOOL){
@@ -406,7 +423,7 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 		printf("%3d | ", p->deflinenum);
 
 		for(r = p->irefp; r != NULL; r = r->nextlinep){
-			printf("%d,", r->reflinenum);
+			printf("%d", r->reflinenum);
 			if(r->nextlinep != NULL){
 				printf(",");
 			}

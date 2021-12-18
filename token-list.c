@@ -72,6 +72,8 @@ int main(int nc, char *np[]) {
 	*/
 	token = scan();
 	parse_program();
+	print_idtab(globalidroot);
+	print_idtab(localidroot);
     return 0;
 }
 
