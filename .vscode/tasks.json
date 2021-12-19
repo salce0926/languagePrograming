@@ -39,6 +39,23 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+
+        {
+            "type": "shell",
+            "label": "scan",
+            "command": "make scan",
+            "args": [],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ],
     "version": "2.0.0"

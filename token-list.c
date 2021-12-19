@@ -46,34 +46,20 @@ char *tokenstr[NUMOFTOKEN+1] = {
 };
 
 int main(int nc, char *np[]) {
-	int /*token,*/ i;
+	int i;
 	extern int token;
 
     if(nc < 2) {
-	printf("File name id not given.\n");
-	return 0;
+		printf("File name id not given.\n");
+		return 0;
     }
     if(init_scan(np[1]) < 0) {
-	printf("File %s can not open.\n", np[1]);
-	return 0;
+		printf("File %s can not open.\n", np[1]);
+		return 0;
     }
-	/*
-	for(i = 1; i <= NUMOFTOKEN; i++){
-		numtoken[i] = 0;
-	}
-    while((token = scan()) >= 0) {
-		numtoken[token]++;
-    }
-    end_scan();
-	for(i = 1; i <= NUMOFTOKEN; i++){
-		if(numtoken[i] == 0) continue;
-		printf("\"%s\t\"\t%d\n", tokenstr[i], numtoken[i]);
-	}
-	*/
+
 	token = scan();
-	parse_program();
-	print_idtab(globalidroot);
-	print_idtab(localidroot);
+	if(parse_program() != ERROR) print_alltab();
     return 0;
 }
 

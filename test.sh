@@ -4,5 +4,5 @@
 DIR=$1
 
 for file in `\find $DIR -name '*.mpl'`; do
-  ./scan $file
+  ./parse $file
 done

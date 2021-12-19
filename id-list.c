@@ -93,7 +93,7 @@ int init_id(struct ID *p){
 	p->name = NULL;
 	p->procname = NULL;
 	p->itp = NULL;
-	p->ispara = -1;
+	p->ispara = 0;
 	p->deflinenum = -1;
 	p->irefp = NULL;
 	p->nextp = NULL;
@@ -147,7 +147,6 @@ struct LINE *create_newline(){
 
 char *create_newname(char *np){
 	char *p;
-	if(is_debugmode) printf("%s\n", __func__);
 	if(np == NULL){
 		return(NULL);
 	}
@@ -200,14 +199,13 @@ int release_idtab(struct ID **id_root) {	/* Release tha data structure */
 }
 
 /* search the name pointed by np */
-struct ID *search_id_byname(struct ID *idroot, char *np) {	
+struct ID *search_id_byname(struct ID *idroot, char *np, char *scope_p) {	
 	struct ID *p;
-	if(is_debugmode) printf("%s\n", __func__);
-	/*print_idtab(idroot);*/
 
 	for(p = idroot; p != NULL; p = p->nextp) {
 		if(strcmp(np, p->name) == 0){
 			if(scope_p == NULL && p->procname == NULL) return(p);
+			if(scope_p == NULL || p->procname == NULL) continue;
 			if(strcmp(scope_p, p->procname) == 0) return(p);
 		}
 	}
@@ -215,7 +213,6 @@ struct ID *search_id_byname(struct ID *idroot, char *np) {
 }
 
 int store_idname(char **temp_id_name, char *np){
-	if(is_debugmode) printf("%s\n", __func__);
 	if(*temp_id_name != NULL){
 		/*temp_id_name is unused or not initialised after used it*/
 		printf("NOTE: current temp_id_name value is %s\n", *temp_id_name);
@@ -229,9 +226,8 @@ int store_idname(char **temp_id_name, char *np){
 int store_id_byname(struct ID **temp_id, char *np){
 	struct ID *p;
 	struct ID **idroot;
-	if(is_debugmode) printf("%s\n", __func__);
 	idroot = get_idroot();
-	if((p = search_id_byname(*idroot, np)) != NULL && strcmp(p->procname, scope_p) == 0){
+	if((p = search_id_byname(*idroot, np, scope_p)) != NULL && strcmp(p->procname, scope_p) == 0){
 		return(error("this ID already exists in same scope\n"));
 	}
 
@@ -246,7 +242,6 @@ int store_id_byname(struct ID **temp_id, char *np){
 
 int store_standard_type(struct TYPE **temp_type, int ttype){
 	struct TYPE *p = create_newtype();
-	if(is_debugmode) printf("%s\n", __func__);
 
 	p->ttype = ttype;
 
@@ -318,8 +313,11 @@ int store_argument(struct TYPE **temp_argument, int ttype){
 }
 
 int check_argument(struct ID *procedure, struct TYPE **temp_argument){
-	struct TYPE *parameter = procedure->itp->paratp;
-	struct TYPE *argument = *temp_argument;
+	struct TYPE *parameter;
+	struct TYPE *argument;
+	if(procedure != NULL) parameter = procedure->itp->paratp;
+	else parameter = NULL;
+	argument = *temp_argument;
 	while(parameter != NULL && argument != NULL){
 		if(parameter == NULL || argument == NULL){
 			return(error("the number of the argument does not match the number of the parameter\n"));
@@ -344,36 +342,12 @@ int ref_newid(struct ID *p){
 	return(NORMAL);
 }
 
-/*
-void id_countup(char *np) {
-	struct ID *p;
-	char *cp;
-
-	if((p = search_idtab(np)) != NULL) p->count++;
-	else {
-		if((p = (struct ID *)malloc(sizeof(struct ID))) == NULL) {
-			printf("can not malloc in id_countup\n");
-			return;
-		}
-		if((cp = (char *)malloc(strlen(np)+1)) == NULL) {
-			printf("can not malloc-2 in id_countup\n");
-			return;
-		}
-		strcpy(cp, np);
-		p->name = cp;
-		p->count = 1;
-		p->nextp = idroot;
-		idroot = p;
-	}
-}
-*/
-
 int print_idtab(struct ID *idroot) {	/* Output the registered data */
 	struct ID *p;
 	struct TYPE *q;
 	struct LINE *r;
 	int name_length = 20;
-	int type_length = 30;
+	int type_length = 45;
 	int define_length = 4;
 	int reference_length = 30;
 	int temp_length = 0;
@@ -384,10 +358,11 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 		"array of int", "array of char", "array of boolean", "procedure"
 	};
 
-	printf("--------------------------------------------------------------------------\n");
+	printf("\n");
+	printf("----------------------------------------------------------------------------------------\n");
 	printf("%*s", -name_length, "Name");
 	printf("%*s", -type_length, "Type");
-	printf("%*s", define_length, "Def.|");
+	printf("%*s", define_length, "Def. ");
 	printf("%*s\n", -reference_length, "Ref.");
 
 	for(p = idroot; p != NULL; p = p->nextp) {
@@ -398,10 +373,10 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 			printf(":%*s", -(name_length - (int)strlen(p->name) - 1), p->procname);
 		}
 
-		if(p->itp->ttype == TPINT || p->itp->ttype == TPCHAR || p->itp->ttype == TPBOOL){
-			printf("%*s", -type_length, type_str[p->itp->ttype]);
-		}else if(p->itp->ttype == TPARRAY){
+		if(is_array(p->itp)){
 			printf("array [%3d] of %*s", p->itp->arraysize, -(type_length - (int)strlen("array [100] of ")), type_str[p->itp->ttype]);
+		}else if(p->itp->ttype == TPINT || p->itp->ttype == TPCHAR || p->itp->ttype == TPBOOL){
+			printf("%*s", -type_length, type_str[p->itp->ttype]);
 		}else if(p->itp->ttype == TPPROC){
 			if(p->itp->paratp == NULL){
 				printf("%*s", -type_length, type_str[TPPROC]);
@@ -415,7 +390,7 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 					printf(",%s", type_str[q->ttype]);
 					temp_length += strlen(type_str[q->ttype]) + 1;
 				}
-				printf("%*s", -temp_length, ")");
+				printf("%*s", -(type_length - temp_length), ")");
 				temp_length = 0;
 			}
 		}
@@ -432,6 +407,52 @@ int print_idtab(struct ID *idroot) {	/* Output the registered data */
 		printf("\n");
 	}
 
-	printf("--------------------------------------------------------------------------\n");
+	printf("----------------------------------------------------------------------------------------\n");
 	return(NORMAL);
+}
+
+int print_alltab(){
+	struct ID *p;
+	if(globalidroot == NULL) return(NORMAL);
+	for(p = globalidroot; p->nextp != NULL; p = p->nextp);
+	p->nextp = localidroot;
+	print_idtab(sort(globalidroot));
+	return(NORMAL);
+}
+
+void swap(struct ID **p, struct ID **q){
+	(*p)->nextp = (*p)->nextp->nextp;
+	(*q)->nextp = (*q)->nextp->nextp;
+	(*p)->nextp->nextp = *q;
+	*q = (*p)->nextp;
+	return;
+}
+
+int compare_id(struct ID *p, struct ID *q){
+	int res = strcasecmp(p->name, q->name);
+	if(res != 0) return(res);
+	else if(p->procname != NULL && q->procname != NULL) return(strcasecmp(p->procname, q->procname));
+	else if(p->procname == NULL) return(-1);
+	else if(q->procname == NULL) return(1);
+}
+
+struct ID *sort(struct ID *idroot){
+	struct ID *p, *q;
+	struct ID list;
+	int i, j;
+	int n = 0;
+	for(p = idroot; p != NULL; p = p->nextp) n++;
+	list.nextp = idroot;
+	for(i = 1; i < n; i++){
+		p = &list;
+		q = list.nextp;
+		for(j = 0; j < n - i; j++){
+			if(compare_id(p->nextp, q->nextp) > 0){
+				swap(&p, &q);
+			}
+			p = p->nextp;
+			q = q->nextp;
+		}
+	}
+	return list.nextp;
 }
