@@ -1,48 +1,220 @@
-sample3/sample35.mpl
+sample1/sample011.mpl
+
+ in line 1, ERROR: Keyword 'program' is not found
+sample1/sample11.mpl
 
 ----------------------------------------------------------------------------------------
 Name                Type                                         Def. Ref.                          
-b                   boolean                                        2 | 
-c                   char                                           2 | 
-i                   integer                                        2 | 4,5,6,6,7,7,10,11,12,12,13,14,14
+data                integer                                        2 | 8,9
+n                   integer                                        2 | 5,7,10,10
+sum                 integer                                        2 | 6,9,9,12
 ----------------------------------------------------------------------------------------
-sample3/sample33p.mpl
+sample1/sample16.mpl
 
 ----------------------------------------------------------------------------------------
 Name                Type                                         Def. Ref.                          
-a                   integer                                        2 | 23,25
-a:p                 char                                           3 | 7,8,8
-a:q                 boolean                                       13 | 18,19
-b                   char                                          11 | 23,24
-b:q                 integer                                       12 | 18
-c                   integer                                       21 | 
-p                   procedure(char)                                3 | 24
-q                   procedure(integer)                            12 | 26
-q:q                 integer                                       14 | 17,18
-x                   integer                                        2 | 5,6,7,8,9,9,9
+furui               array [20000] of boolean                         2 | 7,10,11,14,19
+i                   integer                                        3 | 5,6,7,8,8,12,13,14,15,16,17,21,23,23
+j                   integer                                        3 | 16,18,19,20,20
 ----------------------------------------------------------------------------------------
-sample3/sample032p.mpl
-
- in line 2, ERROR: recursive calls are not allowed
-
-sample3/sample34.mpl
+sample1/sample15.mpl
 
 ----------------------------------------------------------------------------------------
 Name                Type                                         Def. Ref.                          
-ch                  char                                           2 | 6,9,14,17
-num                 integer                                        2 | 6,8,10,10,14,16,18,18
+e                   integer                                        2 | 7,9,10,10
+n                   integer                                        2 | 6,8,9,9,9,9,9,9,9,11,11
 ----------------------------------------------------------------------------------------
-sample3/sample31p.mpl
+sample1/sample11p.mpl
 
 ----------------------------------------------------------------------------------------
 Name                Type                                         Def. Ref.                          
-a                   integer                                        2 | 20,22,22
-a:p                 char                                           3 | 6
-a:q                 boolean                                       10 | 15,16
-b                   char                                           8 | 20,21
-b:q                 integer                                        9 | 15
-c                   integer                                       18 | 
-p                   procedure(char)                                3 | 21
-q                   procedure(integer)                             9 | 22,23
-q:q                 integer                                       11 | 14,15
+data                integer                                       13 | 18,19
+goukei              procedure                                     14 | 25
+kazuyomikomi        procedure                                      3 | 24
+n                   integer                                        2 | 6,17,20,20
+sum                 integer                                        8 | 11,16,19,19
+wakakidasi          procedure                                      9 | 27
+----------------------------------------------------------------------------------------
+sample1/commenteof.mpl
+parse error at end of input.
+
+ in line 0, ERROR: Keyword 'program' is not found
+sample1/sample19p.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+a:abs               integer                                       24 | 26,26,27
+a:gcm               integer                                       28 | 31,33
+a:gcmlcm            integer                                       12 | 14,17,17,18,21
+a:lcm               integer                                       37 | 40,42
+a:printfinal        integer                                       90 | 92,92,93,94
+a:printtemp         integer                                       96 | 98,98,99,100
+a1:reduce           integer                                       46 | 49,50,51,51,52,53,53
+a2:reduce           integer                                       46 | 49,50,51,51,51,52,54,54
+aa:gcm              integer                                       29 | 33,34
+aa:lcm              integer                                       38 | 42,43
+abs                 procedure(integer,integer)                    24 | 33,33,42,42
+b:abs               integer                                       24 | 26,26
+b:gcm               integer                                       28 | 31,33
+b:gcmlcm            integer                                       12 | 15,16,17,17,18,19
+b:lcm               integer                                       37 | 40,42
+b:printfinal        integer                                       90 | 93,94
+b:printtemp         integer                                       96 | 99,100
+bb:gcm              integer                                       29 | 33,34
+bb:lcm              integer                                       38 | 42,43
+com                 char                                         104 | 112,113,113,114,115,116,117,120,120
+divide              procedure(integer,integer,integer,integer)    85 | 119
+endflag             boolean                                      105 | 109,110,120,132
+gc:gcm              integer                                       28 | 31,34
+gc:gcmlcm           integer                                        9 | 21,22
+gc:lcm              integer                                       38 | 43
+gc:mult             integer                                       73 | 75,76,77,78,79,80
+gc:reduce           integer                                       47 | 52,53,55
+gcm                 procedure(integer,integer,integer)            28 | 52,75,78
+gcmlcm              procedure(integer,integer,integer,integer)     9 | 34,43
+lc:gcm              integer                                       29 | 34
+lc:gcmlcm           integer                                        9 | 22
+lc:lcm              integer                                       37 | 40,43
+lc:sub              integer                                       68 | 
+lc:sum              integer                                       58 | 60,61,62,64
+lcm                 procedure(integer,integer,integer)            37 | 60
+m:gcmlcm            integer                                        9 | 14,22
+mult                procedure(integer,integer,integer,integer)    72 | 87,116
+n:gcmlcm            integer                                        9 | 15,23
+printfinal          procedure(integer,integer)                    90 | 132
+printtemp           procedure(integer,integer)                    96 | 133
+r:gcmlcm            integer                                       12 | 17,20
+reduce              procedure(integer,integer)                    46 | 65,83
+sub                 procedure(integer,integer,integer,integer)    67 | 115
+sum                 procedure(integer,integer,integer,integer)    57 | 70,114
+x1                  integer                                      103 | 108,113,114,115,116,119,132,133
+x1:divide           integer                                       85 | 87
+x1:mult             integer                                       72 | 75,76,76,81,81,83
+x1:sub              integer                                       67 | 70
+x1:sum              integer                                       57 | 61,61,63,63,65
+x2                  integer                                      103 | 108,113,114,115,116,119,132,133
+x2:divide           integer                                       85 | 87
+x2:mult             integer                                       72 | 78,79,79,82,82,83
+x2:sub              integer                                       67 | 70
+x2:sum              integer                                       57 | 60,61,64,65
+y1                  integer                                      103 | 112,113,114,115,116,118,119
+y1:divide           integer                                       85 | 87
+y1:mult             integer                                       72 | 78,80
+y1:sub              integer                                       67 | 70
+y1:sum              integer                                       57 | 62
+y11:mult            integer                                       73 | 80,81
+y11:sub             integer                                       68 | 
+y11:sum             integer                                       58 | 62,63
+y2                  integer                                      103 | 112,113,114,115,116,119
+y2:divide           integer                                       85 | 87
+y2:mult             integer                                       72 | 75,77
+y2:sub              integer                                       67 | 70
+y2:sum              integer                                       57 | 60,62
+y22:mult            integer                                       73 | 77,82
+----------------------------------------------------------------------------------------
+sample1/aaaaa.mpl
+in line 1, this string is too long.
+Note:the length of valid string is up to 1024.
+
+ in line 1, ERROR: Keyword 'program' is not found
+sample1/sample15a.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+e                   integer                                        2 | 6,8,10,10
+n                   integer                                        2 | 6,8,8,8,8,8,8,8,8,8,9
+----------------------------------------------------------------------------------------
+sample1/upper.mpl
+
+ in line 1, ERROR: Keyword 'program' is not found
+sample1/sample14p.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+com                 char                                          26 | 34,35,35,36,37,38,39,40,40
+divide              procedure                                     22 | 40
+endflag             boolean                                       27 | 31,32,40,52
+mult                procedure                                     18 | 39
+sub                 procedure                                     14 | 38
+sum                 procedure                                     10 | 37
+x                   integer                                        9 | 12,12,16,16,20,20,24,24,30,35,52,53
+y                   integer                                        9 | 13,17,21,25,34,36
+----------------------------------------------------------------------------------------
+sample1/sample014.mpl
+in line 32, unknown symbol:/
+
+ in line 32, ERROR: Keyword 'end' is not found
+sample1/controlchar.mpl
+
+ in line 0, ERROR: Keyword 'program' is not found
+sample1/outofrange.mpl
+in line 11, this number is too large.
+Note:the range of valid numbers is 0 to 32767.
+
+ in line 11, ERROR: Factor is not found
+sample1/sample13.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+can                 integer                                        2 | 14,15,16
+high                integer                                        2 | 11,12,13,15,18,22,23,23,25
+low                 integer                                        2 | 10,12,13,16,19,22,22,23,23,24
+mid                 integer                                        2 | 13,14,14,16,17,18,20
+x                   integer                                        2 | 5,6,15,16,22,23,23,24,25
+----------------------------------------------------------------------------------------
+sample1/stringeof.mpl
+parse error at end of input.
+
+ in line 1, ERROR: Keyword 'program' is not found
+sample1/separator.mpl
+
+ in line 0, ERROR: Keyword 'program' is not found
+sample1/sample14.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+com                 char                                           9 | 18,19,19,22,25,28,31,34,34
+endflag             boolean                                       11 | 15,16,35,48
+x                   integer                                       10 | 14,20,23,23,26,26,29,29,32,32,49,51
+y                   integer                                       10 | 18,20,23,26,29,32
+----------------------------------------------------------------------------------------
+sample1/sample12.mpl
+sample1/sample18.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+can                 integer                                        3 | 12,13,13,14,14,14,14,16,16,18
+factor              array [200] of integer                         2 | 7,16,16,22,22,26,27
+i                   integer                                        3 | 5,6,7,8,8,20,25,26,27,27,29,29
+n                   integer                                        3 | 11,13,14,14,17,17,21,22,22,23,31,31
+----------------------------------------------------------------------------------------
+sample1/blank.mpl
+
+ in line 0, ERROR: Keyword 'program' is not found
+sample1/sample17.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+a                   integer                                        2 | 7,10,10,11,14
+b                   integer                                        2 | 8,9,10,10,11,12
+gcm                 integer                                        3 | 14,15,16
+lcm                 integer                                        3 | 15,16
+m                   integer                                        2 | 6,7,15
+n                   integer                                        2 | 6,8,15
+r                   integer                                        2 | 10,13
+----------------------------------------------------------------------------------------
+sample1/sample11pp.mpl
+
+----------------------------------------------------------------------------------------
+Name                Type                                         Def. Ref.                          
+data                integer                                       12 | 
+data:goukei         integer                                       14 | 18,19
+goukei              procedure(integer,integer)                    13 | 26
+kazuyomikomi        procedure(integer)                             2 | 25
+n                   integer                                       23 | 25,26
+n:goukei            integer                                       13 | 17,20,20
+n:kazuyomikomi      integer                                        2 | 5
+s:goukei            integer                                       13 | 16,19,19
+sum                 integer                                        7 | 10,26
+wakakidasi          procedure                                      8 | 28
 ----------------------------------------------------------------------------------------

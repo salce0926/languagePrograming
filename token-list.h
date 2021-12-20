@@ -134,11 +134,11 @@ extern void prettyPrint(int);
 #define TPPROC	8
 
 struct TYPE {
-	int ttype;
-	int arraysize;
-	struct TYPE *etp;
-	struct TYPE *paratp;
-	struct TYPE *nextp;
+	int ttype; /*TPINT TPCHAR TPBOOL TPPROC*/
+	int arraysize; /*size of array, if array*/
+	struct TYPE *etp; /*unused*/
+	struct TYPE *paratp; /*pointer to parameter's type list if type is TPPROC*/
+	struct TYPE *nextp; /*pointer to next parameter's type if parameter's type*/
 };
 
 struct LINE {
@@ -154,7 +154,7 @@ struct ID {
 	int deflinenum;
 	struct LINE *irefp;
 	struct ID *nextp;
-}; /*Pointers to root of global & local symbol tables*/
+};
 
 extern struct ID *globalidroot, *localidroot; /*Pointers to root of global & local symbol tables*/
 

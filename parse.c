@@ -270,16 +270,15 @@ int call_statement(){
     if(proc->name != NULL && scope_p != NULL && strcmp(proc->name, scope_p) == 0){
         return(error("recursive calls are not allowed\n"));
     }
+    CALL(ref_newid(proc));
     if(token != TLPAREN){
         CALL(check_argument(temp_procedure, &temp_argument));
         return(NORMAL);
     }
-    if(token != TLPAREN) return(NORMAL);
     JUDGE(TLPAREN, "'(' is not found");
     CALL(expressions());
     JUDGE(TRPAREN, "')' is not found");
     CALL(check_argument(proc, &temp_argument));
-    CALL(ref_newid(proc));
     release_typetab(&temp_argument);
     return(NORMAL);
 }

@@ -318,7 +318,7 @@ int check_argument(struct ID *procedure, struct TYPE **temp_argument){
 	if(procedure != NULL) parameter = procedure->itp->paratp;
 	else parameter = NULL;
 	argument = *temp_argument;
-	while(parameter != NULL && argument != NULL){
+	while(parameter != NULL || argument != NULL){
 		if(parameter == NULL || argument == NULL){
 			return(error("the number of the argument does not match the number of the parameter\n"));
 		}
