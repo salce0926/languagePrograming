@@ -1,0 +1,1 @@
+program name ; var a : boolean; begin read(a) end.

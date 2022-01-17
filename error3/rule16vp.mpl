@@ -1,0 +1,1 @@
+program name ; var a : integer; procedure a; begin end; begin end.

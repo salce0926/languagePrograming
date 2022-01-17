@@ -1,0 +1,1 @@
+program name ; var a : array [0] of integer; begin end.

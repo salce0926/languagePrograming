@@ -1,0 +1,1 @@
+program name ; begin a := b end.

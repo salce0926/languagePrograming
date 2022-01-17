@@ -1,0 +1,1 @@
+program name ; begin if boolean('aa') then end.

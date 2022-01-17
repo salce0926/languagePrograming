@@ -1,0 +1,1 @@
+program name ; begin if false * true then end.

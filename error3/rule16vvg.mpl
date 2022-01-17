@@ -1,0 +1,1 @@
+program name ; var a : integer; var a : integer; begin end.

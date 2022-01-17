@@ -1,0 +1,1 @@
+program name ; var a : char; begin a := 0 end.

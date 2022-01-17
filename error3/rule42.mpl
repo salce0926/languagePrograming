@@ -1,0 +1,1 @@
+program name ; begin if not 0 then end.

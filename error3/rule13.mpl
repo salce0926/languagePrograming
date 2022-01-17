@@ -1,0 +1,1 @@
+program name ; procedure a; begin call a end; begin end.

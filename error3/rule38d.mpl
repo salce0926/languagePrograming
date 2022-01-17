@@ -1,0 +1,1 @@
+program name ; begin if false div true then end.

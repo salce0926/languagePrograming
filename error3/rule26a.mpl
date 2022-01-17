@@ -1,0 +1,1 @@
+program name ; var a : char; b : array [1] of char; begin a := b end.

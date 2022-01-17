@@ -1,0 +1,1 @@
+program name ; procedure a(b : integer; c : char); begin end; var b : char; c : integer; begin call a(b, c) end.

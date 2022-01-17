@@ -1,0 +1,1 @@
+program name ; var a : array [1] of boolean; begin write(a) end.

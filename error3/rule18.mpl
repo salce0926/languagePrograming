@@ -1,0 +1,1 @@
+program name ; procedure a (a : array [1] of integer); begin end; begin end.
