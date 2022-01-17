@@ -14,7 +14,7 @@ int to_ttype(int token){
 	if(token == TINTEGER) return(TPINT);
 	if(token == TBOOLEAN) return(TPBOOL);
 	if(token == TCHAR) return(TPCHAR);
-	return(error("to_ttype error"));
+	return(1);
 }
 
 int is_array(struct TYPE *p){
@@ -81,7 +81,7 @@ int push_back_line(struct LINE **line_root, struct LINE *back){
 
 int check_operand_type(struct TYPE **temp_type){
 	struct TYPE *p = pop_front_type(temp_type);
-    if(p->ttype != (*temp_type)->ttype){
+    if(p->ttype != (*temp_type)->ttype || is_array(p) != is_array(*temp_type)){
         return(error("the type of operand does not match\n"));
     }
     free(p);
@@ -224,17 +224,28 @@ int store_idname(char **temp_id_name, char *np){
 }
 
 int store_id_byname(struct ID **temp_id, char *np){
-	struct ID *p;
+	struct ID *p, *q;
 	struct ID **idroot;
 	idroot = get_idroot();
-	if((p = search_id_byname(*idroot, np, scope_p)) != NULL && strcmp(p->procname, scope_p) == 0){
-		return(error("this ID already exists in same scope\n"));
+	if((p = search_id_byname(*idroot, np, scope_p)) != NULL){
+		if(p->procname == NULL && scope_p == NULL){
+			return(error("this ID already exists in same scope\n"));
+		}
+		if(p->procname != NULL && scope_p != NULL && strcmp(p->procname, scope_p) == 0){
+			return(error("this ID already exists in same scope\n"));
+		}
 	}
 
 	p = create_newid();
 	p->name = create_newname(np);
 	p->procname = create_newname(scope_p);
 	p->deflinenum = get_linenum();
+
+	for(q = *temp_id; q != NULL; q = q->nextp){
+		if(strcmp(p->name, q->name) == 0){
+			return(error("this ID already exists in same scope\n"));
+		}
+	}
 
 	push_front_id(temp_id, p);
 	return(NORMAL);
@@ -253,6 +264,7 @@ int store_array_type(struct TYPE **temp_type, int array_size){
 	struct TYPE *p = pop_front_type(temp_type);
 
 	p->arraysize = array_size;
+	if(p->arraysize < 1) return(error("the length of array must be greater than or equal to 1\n"));
 
 	push_front_type(temp_type, p);
 	return(NORMAL);
