@@ -122,6 +122,7 @@ extern int empty_statement();
 extern void println();
 extern int error();
 extern void prettyPrint(int);
+extern void caslPrint(char* filename);
 
 /*Type*/
 #define TPINT	1

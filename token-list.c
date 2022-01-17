@@ -60,6 +60,7 @@ int main(int nc, char *np[]) {
 
 	token = scan();
 	if(parse_program() != ERROR) print_alltab();
+	caslPrint(np[1]);
     return 0;
 }
 

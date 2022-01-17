@@ -611,6 +611,22 @@ void prettyPrint(int token){
     }
 }
 
+void caslPrint(char* filename){
+    FILE *fp;
+    char *casl_name = create_newname(filename);
+    char *p;
+    for(p = casl_name; *p != '.'; p++);
+    *(++p) = '\0';
+    strcat(casl_name, "csl");
+    if((fp = fopen(casl_name, "w")) == NULL){
+        printf("File %s can not open.\n", casl_name);
+        return;
+    }
+    fprintf(fp, "test");
+    fclose(fp);
+    return;
+}
+
 int error(char *mes){
     printf("\n in line %d, ERROR: %s\n", get_linenum(), mes);
     end_scan(); 
