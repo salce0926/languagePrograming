@@ -198,3 +198,43 @@ extern int print_idtab(struct ID *idroot);
 extern void swap(struct ID **p, struct ID **q);
 extern int compare_id(struct ID *p, struct ID *q);
 extern struct ID *sort(struct ID *idroot);
+
+/*order*/
+#define LD 0x10
+#define ST 0x11
+#define LAD 0x12
+#define ADDA 0x20
+#define ADDL 0x21
+#define SUBA 0x22
+#define SUBL 0x23
+#define MULA 0x24
+#define MULL 0x25
+#define DIVA 0x26
+#define DIVL 0x27
+#define AND 0x28
+#define OR 0x29
+#define XOR 0x2A
+#define CPA 0x30
+#define CPL 0x31
+#define SLA 0x38
+#define SRA 0x39
+#define SLL 0x3A
+#define SRL 0x3B
+#define JPL 0x40
+#define JMI 0x41
+#define JNZ 0x42
+#define JZE 0x43
+#define JOV 0x44
+#define JUMP 0x45
+#define PUSH 0x50
+#define POP 0x51
+#define CALL 0x58
+#define RET 0x59
+#define SVC 0x60
+#define NOP 0x61
+#define IN 0x74
+#define OUT 0x75
+#define RPUSH 0x76
+#define RPOP 0x77
+
+#define ORDERSIZE 36
