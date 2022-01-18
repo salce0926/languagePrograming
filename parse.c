@@ -3,6 +3,8 @@
 #define FCALL(function) if(function == ERROR) return(ERROR)
 #define JUDGE(code, string) if(token != code) return(error(string));/*prettyPrint(token);*/token = scan()
 
+FILE *fp;
+
 int token;
 char *scope_p = NULL;
 
@@ -61,12 +63,32 @@ struct KEY orderkey[ORDERSIZE] = {
     {"RPOP", RPOP},
 };
 
-int parse_program() {
+int parse_program(char *filename) {
+    char *p = create_newname(filename);
+    char *casl_name = strtok(p, ".");
+    strcat(casl_name, ".csl");
+    if((fp = fopen(casl_name, "w")) == NULL){
+        printf("File %s can not open.\n", casl_name);
+        return;
+    }
     JUDGE(TPROGRAM, "Keyword 'program' is not found");
     JUDGE(TNAME, "Program name is not found");
+    /* createCodeStart(string_attr);*/
     JUDGE(TSEMI, "Semicolon is not found");
     FCALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
+    createCodeLabel("L0001");
+    createCodeOrder(NOP);
+    createCodeOrderIndexRegister(PUSH, 0, gr1);
+    createCodeOrderRegister(POP, gr1);
+    createCodeOrderRegisterIndex(LAD, gr1, 0);
+    createCodeOrderRegisterIndexRegister(ST, gr1, 0, gr2);
+    createCodeOrderRegisterLabel(ST, gr1, "$n%kazuyomikomi");
+    createCodeOrderRegisterRegister(LD, gr2, gr0);
+    createCodeDC("$sum", 0);
+    createCodeDS("$ary", 5);
+    createCodeEnd();
+    fclose(fp);
     return(NORMAL);
 }
 
@@ -651,17 +673,106 @@ void prettyPrint(int token){
     }
 }
 
-void caslPrint(char* filename){
-    FILE *fp;
-    char *p = create_newname(filename);
-    char *casl_name = strtok(p, ".");
-    strcat(casl_name, ".csl");
-    if((fp = fopen(casl_name, "w")) == NULL){
-        printf("File %s can not open.\n", casl_name);
-        return;
+char *toOrder(int order){
+    int i;
+    for(i = 0; i < ORDERSIZE; i++){
+        if(order == orderkey[i].keytoken){
+            return orderkey[i].keyword;
+        }
     }
-    fprintf(fp, "test");
-    fclose(fp);
+    return "toOrder error";
+}
+
+void tab(){
+    fprintf(fp, "\t");
+    return;
+}
+
+void comma(){
+    fprintf(fp, ",");
+}
+
+void ln(){
+    fprintf(fp, "\n");
+}
+
+void printLabel(char *label){
+    fprintf(fp, "%s", label);
+    return;
+}
+
+void printOrder(int order){
+    fprintf(fp, "%s", toOrder(order));
+    return;
+}
+
+void printRegister(char *reg){
+    fprintf(fp, "%s", reg);
+    return;
+}
+
+void printNumber(int num){
+    fprintf(fp, "%d", num);
+    return;
+}
+
+void createCodeLabel(char *label){ /*label \n*/
+    printLabel(label); ln();
+    return;
+}
+
+void createCodeOrder(int order){/*  order \n*/
+    tab(); printOrder(order); ln();
+    return;
+}
+
+void createCodeOrderRegister(int order, char *reg){/*   order reg \n*/
+    tab(); printOrder(order); tab(); printRegister(reg); ln();
+    return;
+}
+
+void createCodeOrderRegisterLabel(int order, char *reg, char *label){/* order   reg    label \n*/
+    tab(); printOrder(order); tab(); printRegister(reg); tab(); printLabel(label); ln();
+    return;
+}
+
+void createCodeOrderIndexRegister(int order, int index, char *reg){/*   order   index,reg \n*/
+    tab(); printOrder(order); tab(); printNumber(index); comma(); printRegister(reg); ln();
+    return;
+}
+
+void createCodeOrderRegisterRegister(int order, char *reg1, char *reg2){/*  order   reg1,   reg2 \n*/
+    tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab(); printRegister(reg2); ln();
+    return;
+}
+
+void createCodeOrderRegisterIndex(int order, char *reg, int index){/*  order   reg1,   index \n*/
+    tab(); printOrder(order); tab(); printRegister(reg); comma(); tab();printNumber(index); ln();
+    return; 
+}
+
+void createCodeOrderRegisterIndexRegister(int order, char *reg1, int index, char *reg2){/*  order   reg1,   index,reg2 \n*/
+    tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab();printNumber(index); comma(); printRegister(reg2); ln();
+    return; 
+}
+
+void createCodeStart(char *programname){
+    printLabel(programname); tab(); fprintf(fp, "START"); ln();
+    return;
+}
+
+void createCodeDC(char *label, int num){
+    printLabel(label); tab(); fprintf(fp, "DC"); tab(); printNumber(num); ln();
+    return;
+}
+
+void createCodeDS(char *label, int num){
+    printLabel(label); tab(); fprintf(fp, "DS"); tab(); printNumber(num); ln();
+    return;
+}
+
+void createCodeEnd(){/*TODO:Library*/
+    tab(); fprintf(fp, "END"); ln();
     return;
 }
 

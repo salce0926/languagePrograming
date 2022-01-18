@@ -85,7 +85,7 @@ extern void check_line(int is_token);
 
 /* parse.c */
 extern int token;
-extern int parse_program();
+extern int parse_program(char *filename);
 extern int block();
 extern int variable_declaration();
 extern int variable_names();
@@ -120,6 +120,28 @@ extern int output_statement();
 extern int output_format();
 extern int empty_statement();
 extern void println();
+
+extern char *toOrder(int order);
+extern void tab();
+extern void comma();
+extern void ln();
+extern void printLabel(char *label);
+extern void printOrder(int order);
+extern void printRegister(char *reg);
+extern void printNumber(int num);
+extern void createCodeLabel(char *label); /*label \n*/
+extern void createCodeOrder(int order);/*  order \n*/
+extern void createCodeOrderRegister(int order, char *reg);/*   order reg \n*/
+extern void createCodeOrderRegisterLabel(int order, char *reg, char *label);/* order   reg    label \n*/
+extern void createCodeOrderIndexRegister(int order, int index, char *reg);/*   order   index,reg \n*/
+extern void createCodeOrderRegisterRegister(int order, char *reg1, char *reg2);/*  order   reg1,   reg2 \n*/
+extern void createCodeOrderRegisterIndex(int order, char *reg, int index);/*  order   reg1,   index \n*/
+extern void createCodeOrderRegisterIndexRegister(int order, char *reg1, int index, char *reg2);/*  order   reg1,   index,reg2 \n*/
+extern void createCodeStart(char *programname);
+extern void createCodeDC(char *label, int num);
+extern void createCodeDS(char *label, int num);
+extern void createCodeEnd();/*TODO:Library*/
+
 extern int error();
 extern void prettyPrint(int);
 extern void caslPrint(char* filename);
@@ -238,3 +260,12 @@ extern struct ID *sort(struct ID *idroot);
 #define RPOP 0x77
 
 #define ORDERSIZE 36
+
+#define gr0 "gr0"
+#define gr1 "gr1"
+#define gr2 "gr2"
+#define gr3 "gr3"
+#define gr4 "gr4"
+#define gr5 "gr5"
+#define gr6 "gr6"
+#define gr7 "gr7"
