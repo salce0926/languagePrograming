@@ -129,14 +129,15 @@ extern void printLabel(char *label);
 extern void printOrder(int order);
 extern void printRegister(char *reg);
 extern void printNumber(int num);
-extern void createCodeLabel(char *label); /*label \n*/
-extern void createCodeOrder(int order);/*  order \n*/
-extern void createCodeOrderRegister(int order, char *reg);/*   order reg \n*/
-extern void createCodeOrderRegisterLabel(int order, char *reg, char *label);/* order   reg    label \n*/
-extern void createCodeOrderIndexRegister(int order, int index, char *reg);/*   order   index,reg \n*/
-extern void createCodeOrderRegisterRegister(int order, char *reg1, char *reg2);/*  order   reg1,   reg2 \n*/
-extern void createCodeOrderRegisterIndex(int order, char *reg, int index);/*  order   reg1,   index \n*/
-extern void createCodeOrderRegisterIndexRegister(int order, char *reg1, int index, char *reg2);/*  order   reg1,   index,reg2 \n*/
+extern void createCodeL(char *label); /*label \n*/
+extern void createCodeO(int order);/*  order \n*/
+extern void createCodeOL(int order, char *label); /*	order label \n*/
+extern void createCodeOR(int order, char *reg);/*   order reg \n*/
+extern void createCodeORL(int order, char *reg, char *label);/* order   reg    label \n*/
+extern void createCodeOIR(int order, int index, char *reg);/*   order   index,reg \n*/
+extern void createCodeORR(int order, char *reg1, char *reg2);/*  order   reg1,   reg2 \n*/
+extern void createCodeORI(int order, char *reg, int index);/*  order   reg1,   index \n*/
+extern void createCodeORIR(int order, char *reg1, int index, char *reg2);/*  order   reg1,   index,reg2 \n*/
 extern void createCodeStart(char *programname);
 extern void createCodeDC(char *label, int num);
 extern void createCodeDS(char *label, int num);

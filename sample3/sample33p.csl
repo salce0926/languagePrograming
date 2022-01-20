@@ -1,0 +1,24 @@
+$$sample33p	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+$p
+	RET  
+$q
+	RET  
+L0001
+	NOP  
+	PUSH 	0,gr1
+	POP  	gr1
+	LAD  	gr1,	0
+	ST   	gr1,	0,gr2
+	ST   	gr1,	$n%kazuyomikomi
+	LD   	gr2,	gr0
+	JUMP 	L0002
+$sum	DC	0
+L0002
+	JUMP 	L0003
+$ary	DS	5
+L0003
+	END

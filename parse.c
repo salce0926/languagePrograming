@@ -3,7 +3,8 @@
 #define FCALL(function) if(function == ERROR) return(ERROR)
 #define JUDGE(code, string) if(token != code) return(error(string));/*prettyPrint(token);*/token = scan()
 
-FILE *fp;
+FILE *fq;
+int n_label = 1;
 
 int token;
 char *scope_p = NULL;
@@ -67,28 +68,28 @@ int parse_program(char *filename) {
     char *p = create_newname(filename);
     char *casl_name = strtok(p, ".");
     strcat(casl_name, ".csl");
-    if((fp = fopen(casl_name, "w")) == NULL){
+    if((fq = fopen(casl_name, "w")) == NULL){
         printf("File %s can not open.\n", casl_name);
         return;
     }
     JUDGE(TPROGRAM, "Keyword 'program' is not found");
     JUDGE(TNAME, "Program name is not found");
-    /* createCodeStart(string_attr);*/
+    createCodeStart(string_attr);
     JUDGE(TSEMI, "Semicolon is not found");
     FCALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
-    createCodeLabel("L0001");
-    createCodeOrder(NOP);
-    createCodeOrderIndexRegister(PUSH, 0, gr1);
-    createCodeOrderRegister(POP, gr1);
-    createCodeOrderRegisterIndex(LAD, gr1, 0);
-    createCodeOrderRegisterIndexRegister(ST, gr1, 0, gr2);
-    createCodeOrderRegisterLabel(ST, gr1, "$n%kazuyomikomi");
-    createCodeOrderRegisterRegister(LD, gr2, gr0);
+    createCodeL("L0001");
+    createCodeO(NOP);
+    createCodeOIR(PUSH, 0, gr1);
+    createCodeOR(POP, gr1);
+    createCodeORI(LAD, gr1, 0);
+    createCodeORIR(ST, gr1, 0, gr2);
+    createCodeORL(ST, gr1, "$n%kazuyomikomi");
+    createCodeORR(LD, gr2, gr0);
     createCodeDC("$sum", 0);
     createCodeDS("$ary", 5);
     createCodeEnd();
-    fclose(fp);
+    fclose(fq);
     return(NORMAL);
 }
 
@@ -185,6 +186,7 @@ int array_type(){
 }
 
 int subprogram_declaration(){
+    char subprogramname[MAXSTRSIZE];
     indent_count = 1;
     JUDGE(TPROCEDURE, "Keyword 'procedure' is not found");
     FCALL(procedure_name());
@@ -199,8 +201,16 @@ int subprogram_declaration(){
     JUDGE(TSEMI, "Semicolon is not found");
     if(token == TVAR) FCALL(variable_declaration());
     indent_count = 1;
+
+    strcpy(subprogramname, "$");
+    strcat(subprogramname, scope_p);
+    createCodeL(subprogramname);
+
     FCALL(compound_statement());
     JUDGE(TSEMI, "Semicolon is not found");
+
+    createCodeO(RET);
+
     free(scope_p);
     scope_p = NULL;
     return(NORMAL);
@@ -683,96 +693,122 @@ char *toOrder(int order){
     return "toOrder error";
 }
 
+void setLabelL(int n_label, char s_label[6]){
+    sprintf(s_label, "L%04d", n_label);
+    return;
+}
+
 void tab(){
-    fprintf(fp, "\t");
+    fprintf(fq, "\t");
     return;
 }
 
 void comma(){
-    fprintf(fp, ",");
+    fprintf(fq, ",");
 }
 
 void ln(){
-    fprintf(fp, "\n");
+    fprintf(fq, "\n");
 }
 
 void printLabel(char *label){
-    fprintf(fp, "%s", label);
+    fprintf(fq, "%s", label);
     return;
 }
 
 void printOrder(int order){
-    fprintf(fp, "%s", toOrder(order));
+    fprintf(fq, "%-5s", toOrder(order));
     return;
 }
 
 void printRegister(char *reg){
-    fprintf(fp, "%s", reg);
+    fprintf(fq, "%s", reg);
     return;
 }
 
 void printNumber(int num){
-    fprintf(fp, "%d", num);
+    fprintf(fq, "%d", num);
     return;
 }
 
-void createCodeLabel(char *label){ /*label \n*/
+void createCodeL(char *label){ /*label \n*/
     printLabel(label); ln();
     return;
 }
 
-void createCodeOrder(int order){/*  order \n*/
+void createCodeO(int order){/*  order \n*/
     tab(); printOrder(order); ln();
     return;
 }
 
-void createCodeOrderRegister(int order, char *reg){/*   order reg \n*/
+void createCodeOL(int order, char *label){/*   order label \n*/
+    tab(); printOrder(order); tab(); printLabel(label); ln();
+    return;
+}
+
+void createCodeOR(int order, char *reg){/*   order reg \n*/
     tab(); printOrder(order); tab(); printRegister(reg); ln();
     return;
 }
 
-void createCodeOrderRegisterLabel(int order, char *reg, char *label){/* order   reg    label \n*/
-    tab(); printOrder(order); tab(); printRegister(reg); tab(); printLabel(label); ln();
+void createCodeORL(int order, char *reg, char *label){/* order   reg,    label \n*/
+    tab(); printOrder(order); tab(); printRegister(reg); comma(); tab(); printLabel(label); ln();
     return;
 }
 
-void createCodeOrderIndexRegister(int order, int index, char *reg){/*   order   index,reg \n*/
+void createCodeOIR(int order, int index, char *reg){/*   order   index,reg \n*/
     tab(); printOrder(order); tab(); printNumber(index); comma(); printRegister(reg); ln();
     return;
 }
 
-void createCodeOrderRegisterRegister(int order, char *reg1, char *reg2){/*  order   reg1,   reg2 \n*/
+void createCodeORR(int order, char *reg1, char *reg2){/*  order   reg1,   reg2 \n*/
     tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab(); printRegister(reg2); ln();
     return;
 }
 
-void createCodeOrderRegisterIndex(int order, char *reg, int index){/*  order   reg1,   index \n*/
+void createCodeORI(int order, char *reg, int index){/*  order   reg1,   index \n*/
     tab(); printOrder(order); tab(); printRegister(reg); comma(); tab();printNumber(index); ln();
     return; 
 }
 
-void createCodeOrderRegisterIndexRegister(int order, char *reg1, int index, char *reg2){/*  order   reg1,   index,reg2 \n*/
+void createCodeORIR(int order, char *reg1, int index, char *reg2){/*  order   reg1,   index,reg2 \n*/
     tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab();printNumber(index); comma(); printRegister(reg2); ln();
     return; 
 }
 
 void createCodeStart(char *programname){
-    printLabel(programname); tab(); fprintf(fp, "START"); ln();
+    char s_label[6];
+    char program_name_label[MAXSTRSIZE];
+    sprintf(program_name_label, "$$%s", programname);
+    printLabel(program_name_label); tab(); fprintf(fq, "START"); ln();
+    createCodeORI(LAD, gr0, 0);
+    setLabelL(n_label++, s_label);
+    createCodeOL(CALL, s_label);
+    createCodeOL(CALL, "FLUSH");
+    tab(); printOrder(SVC); tab(); printNumber(0); ln();
     return;
 }
 
 void createCodeDC(char *label, int num){
-    printLabel(label); tab(); fprintf(fp, "DC"); tab(); printNumber(num); ln();
+    char s_label[6];
+    setLabelL(n_label++, s_label);
+    createCodeOL(JUMP, s_label);
+    printLabel(label); tab(); fprintf(fq, "DC"); tab(); printNumber(num); ln();
+    createCodeL(s_label);
     return;
 }
 
 void createCodeDS(char *label, int num){
-    printLabel(label); tab(); fprintf(fp, "DS"); tab(); printNumber(num); ln();
+    char s_label[6];
+    setLabelL(n_label++, s_label);
+    createCodeOL(JUMP, s_label);
+    printLabel(label); tab(); fprintf(fq, "DS"); tab(); printNumber(num); ln();
+    createCodeL(s_label);
     return;
 }
 
 void createCodeEnd(){/*TODO:Library*/
-    tab(); fprintf(fp, "END"); ln();
+    tab(); fprintf(fq, "END"); ln();
     return;
 }
 
