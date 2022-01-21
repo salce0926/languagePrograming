@@ -5,6 +5,7 @@
 
 FILE *fq;
 int n_label = 1;
+struct PRINTDC *list = NULL;
 
 int token;
 char *scope_p = NULL;
@@ -78,16 +79,6 @@ int parse_program(char *filename) {
     JUDGE(TSEMI, "Semicolon is not found");
     FCALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
-    createCodeL("L0001");
-    createCodeO(NOP);
-    createCodeOIR(PUSH, 0, gr1);
-    createCodeOR(POP, gr1);
-    createCodeORI(LAD, gr1, 0);
-    createCodeORIR(ST, gr1, 0, gr2);
-    createCodeORL(ST, gr1, "$n%kazuyomikomi");
-    createCodeORR(LD, gr2, gr0);
-    createCodeDC("$sum", 0);
-    createCodeDS("$ary", 5);
     createCodeEnd();
     fclose(fq);
     return(NORMAL);
@@ -99,17 +90,27 @@ int block(){
         if(token == TPROCEDURE) FCALL(subprogram_declaration());
     }
     indent_count = 0;
+    createCodeL("L0001");
     FCALL(compound_statement());
+    createCodeO(RET);
     return(NORMAL);
 }
 
 int variable_declaration(){
+    struct ID *p;
     indent_count = 1;
     JUDGE(TVAR, "Keyword 'var' is not found");
     FCALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     FCALL(type());
     FCALL(register_id_bytype(temp_id, temp_type));
+    for(p = temp_id; p != NULL; p = p->nextp){
+        if(is_array(p->itp)){
+            createCodeDS(create_newlabel(p->name, p->procname), p->itp->arraysize);
+        }else{
+            createCodeDC(create_newlabel(p->name, p->procname), 0);
+        }
+    }
     temp_id = NULL;
     temp_type = NULL;
     JUDGE(TSEMI, "Semicolon is not found");
@@ -118,6 +119,13 @@ int variable_declaration(){
         JUDGE(TCOLON, "Colon is not found");
         FCALL(type());
         FCALL(register_id_bytype(temp_id, temp_type));
+        for(p = temp_id; p != NULL; p = p->nextp){
+            if(is_array(p->itp)){
+                createCodeDS(create_newlabel(p->name, p->procname), p->itp->arraysize);
+            }else{
+                createCodeDC(create_newlabel(p->name, p->procname), 0);
+            }
+        }
         temp_id = NULL;
         temp_type = NULL;
         JUDGE(TSEMI, "Semicolon is not found");
@@ -507,17 +515,21 @@ int constant(){
         if(token == TNUMBER){
             JUDGE(TNUMBER, "Number is not found");
             FCALL(store_standard_type(&temp_type, TPINT));
+                createCodeORI(LAD, gr1, num_attr);
         }else if(token == TFALSE){
             JUDGE(TFALSE, "Keyword 'false' is not found");
             FCALL(store_standard_type(&temp_type, TPBOOL));
+                createCodeORR(LD, gr1, gr0);
         }else if(token == TTRUE){
             JUDGE(TTRUE, "Keyword 'true' is not found");
             FCALL(store_standard_type(&temp_type, TPBOOL));
+                createCodeORI(LAD, gr1, 1);
         }else if(token == TSTRING){
             length = strlen(string_attr);
             JUDGE(TSTRING, "String is not found");
             if(length != 1) return(error("the length of the string must be 1\n"));
             FCALL(store_standard_type(&temp_type, TPCHAR));
+                createCodeORI(LAD, gr1, string_attr[0]);
         }
     }
     return(NORMAL);
@@ -683,6 +695,54 @@ void prettyPrint(int token){
     }
 }
 
+int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p){
+	p->nextp = *idroot;
+	*idroot = p;
+	return(NORMAL);
+}
+
+int init_printDC(struct PRINTDC *p){
+    p->label = NULL;
+    p->value = NULL;
+    p->nextp = NULL;
+    return(NORMAL);
+}
+
+struct PRINTDC *create_newprintDC(){
+	struct PRINTDC *p;
+	if((p = (struct PRINTDC *)malloc(sizeof(struct PRINTDC))) == NULL) {
+		printf("can not malloc in create_newprintDC\n");
+		return(NULL);
+	}
+	init_printDC(p);
+	return(p);
+}
+
+char *create_newlabel(char *name, char *procname){
+	char *p;
+	if(name == NULL){
+		return(NULL);
+	}
+    if(procname == NULL){
+        if((p = (char *)malloc(1+strlen(name)+1)) == NULL){
+            printf("can not malloc in create_newlabel\n");
+            return(NULL);
+        }
+        strcpy(p, "$");
+        strcat(p, name);
+    }else{
+        if((p = (char *)malloc(1+strlen(name)+1+strlen(procname)+1)) == NULL){
+            printf("can not malloc in create_newname\n");
+            return(NULL);
+        }
+        strcpy(p, "$");
+        strcat(p, name);
+        strcat(p, "%");
+        strcat(p, procname);
+    }
+	return(p);
+}
+
 char *toOrder(int order){
     int i;
     for(i = 0; i < ORDERSIZE; i++){
@@ -766,7 +826,7 @@ void createCodeORR(int order, char *reg1, char *reg2){/*  order   reg1,   reg2 \
     return;
 }
 
-void createCodeORI(int order, char *reg, int index){/*  order   reg1,   index \n*/
+void createCodeORI(int order, char *reg, int index){/*  order   reg,   index \n*/
     tab(); printOrder(order); tab(); printRegister(reg); comma(); tab();printNumber(index); ln();
     return; 
 }

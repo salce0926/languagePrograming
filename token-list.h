@@ -121,6 +121,12 @@ extern int output_format();
 extern int empty_statement();
 extern void println();
 
+struct PRINTDC{
+    char *label;
+    char *value;
+    struct PRINTDC *nextp;
+};
+
 extern char *toOrder(int order);
 extern void tab();
 extern void comma();
@@ -145,6 +151,10 @@ extern void createCodeEnd();/*TODO:Library*/
 
 extern int error();
 extern void prettyPrint(int);
+extern int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p);
+extern int init_printDC(struct PRINTDC *p);
+extern struct PRINTDC *create_newprintDC();
+extern char *create_newlabel(char *name, char *procname);
 extern void caslPrint(char* filename);
 
 /*Type*/

@@ -1,0 +1,30 @@
+$$sample11pp	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+$kazuyomikomi
+	RET  
+	JUMP 	L0002
+$sum	DC	0
+L0002
+$wakakidasi
+	RET  
+	JUMP 	L0003
+$data	DC	0
+L0003
+	JUMP 	L0004
+$data%goukei	DC	0
+L0004
+$goukei
+	LAD  	gr1,	0
+	LAD  	gr1,	0
+	LAD  	gr1,	1
+	RET  
+	JUMP 	L0005
+$n	DC	0
+L0005
+L0001
+	LAD  	gr1,	2
+	RET  
+	END

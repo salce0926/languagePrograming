@@ -32,7 +32,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/parse",
-            "args": ["sample3/sample33p.mpl"],
+            "args": ["sample1/sample11p.mpl"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
             "environment": [],
