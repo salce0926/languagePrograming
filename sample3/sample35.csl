@@ -1,0 +1,45 @@
+$$typeconv	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+	JUMP 	L0002
+$i	DC	0
+L0002
+	JUMP 	L0003
+$b	DC	0
+L0003
+	JUMP 	L0004
+$c	DC	0
+L0004
+L0001
+	LD   	gr1,	gr0
+	LAD  	gr1,	1
+	POP  	gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEBOOL
+	JUMP 	L0006
+L0005	DC	' : '
+L0006
+	LAD  	gr1,	L0005
+	CALL 	WRITESTR
+	POP  	gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	CALL 	WRITELINE
+	LAD  	gr1,	1
+	LAD  	gr1,	32
+	LAD  	gr1,	127
+	LAD  	gr1,	16
+	LAD  	gr1,	16
+	POP  	gr1
+	LD   	gr2,	gr0
+	CALL 	WRITECHAR
+	JUMP 	L0008
+L0007	DC	' '
+L0008
+	LAD  	gr1,	L0007
+	CALL 	WRITESTR
+	LAD  	gr1,	1
+	RET  
+	END

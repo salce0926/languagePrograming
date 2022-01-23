@@ -128,6 +128,7 @@ struct PRINTDC{
 };
 
 extern char *toOrder(int order);
+extern void setLabelL(int n_label, char s_label[6]);
 extern void tab();
 extern void comma();
 extern void ln();
@@ -146,6 +147,7 @@ extern void createCodeORI(int order, char *reg, int index);/*  order   reg1,   i
 extern void createCodeORIR(int order, char *reg1, int index, char *reg2);/*  order   reg1,   index,reg2 \n*/
 extern void createCodeStart(char *programname);
 extern void createCodeDC(char *label, int num);
+extern void createCodeDCS(char *label, char *string);
 extern void createCodeDS(char *label, int num);
 extern void createCodeEnd();/*TODO:Library*/
 

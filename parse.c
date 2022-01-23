@@ -607,10 +607,12 @@ int relational_operator(){
 
 int input_statement(){
     struct TYPE *p;
+    int has_ln = 0;
     if(token == TREAD || token == TREADLN){
         if(token == TREAD){
             JUDGE(TREAD, "Keyword 'read' is not found");
         }else if(token == TREADLN){
+            has_ln = 1;
             JUDGE(TREADLN, "Keyword 'readln' is not found");
         }
     }
@@ -619,23 +621,38 @@ int input_statement(){
     FCALL(variable());
     p = pop_front_type(&temp_type);
     if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
+    createCodeOR(POP, gr1);
+    if(p->ttype == TPINT){
+        createCodeOL(CALL, "READINT");
+    }else if(p->ttype == TPCHAR){
+        createCodeOL(CALL, "READCHAR");
+    }
     release_typetab(&p);
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         FCALL(variable());
         p = pop_front_type(&temp_type);
         if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
+        createCodeOR(POP, gr1);
+        if(p->ttype == TPINT){
+            createCodeOL(CALL, "READINT");
+        }else if(p->ttype == TPCHAR){
+            createCodeOL(CALL, "READCHAR");
+        }
         release_typetab(&p);
     }
     JUDGE(TRPAREN, "')' is not found");
+    if(has_ln) createCodeOL(CALL, "READLINE");
     return(NORMAL);
 }
 
 int output_statement(){
+    int has_ln = 0;
     if(token == TWRITE || token == TWRITELN){
         if(token == TWRITE){
             JUDGE(TWRITE, "Keyword 'write' is not found");
         }else if(token == TWRITELN){
+            has_ln = 1;
             JUDGE(TWRITELN, "Keyword 'writeln' is not found");
         }
     }
@@ -647,22 +664,45 @@ int output_statement(){
         FCALL(output_format());
     }
     JUDGE(TRPAREN, "')' is not found");
+    if(has_ln) createCodeOL(CALL, "WRITELINE");
     return(NORMAL);
 }
 
 int output_format(){
     struct TYPE *p;
+    char string[MAXSTRSIZE];
+    char s_label[6];
     if(token == TSTRING){
         JUDGE(TSTRING, "String is not found");
+        string_attr[1000] = '\0';
+        strcpy(string, "'");
+        strcat(string, string_attr);
+        strcat(string, "'");
+        setLabelL(n_label++, s_label);
+        createCodeDCS(s_label, string);
+        createCodeORL(LAD, gr1, s_label);
+        createCodeOL(CALL, "WRITESTR");
         return(NORMAL);
     }
     FCALL(expression());
     p = pop_front_type(&temp_type);
     if(is_array(p)) return(error("using array type as output format is not allowed\n"));
+    createCodeOR(POP, gr1);
+    if(token != TCOLON){
+        createCodeORR(LD, gr2, gr0);
+    }else{
+        JUDGE(TCOLON, "Colon is not found");
+        JUDGE(TNUMBER, "Number is not found");
+        createCodeORI(LAD, gr2, num_attr);
+    }
+    if(p->ttype == TPINT){
+        createCodeOL(CALL, "WRITEINT");
+    }else if(p->ttype == TPCHAR){
+        createCodeOL(CALL, "WRITECHAR");
+    }else if(p->ttype = TPBOOL){
+        createCodeOL(CALL, "WRITEBOOL");
+    }
     release_typetab(&p);
-    if(token != TCOLON) return(NORMAL);
-    JUDGE(TCOLON, "Colon is not found");
-    JUDGE(TNUMBER, "Number is not found");
     return(NORMAL);
 }
 
@@ -861,6 +901,15 @@ void createCodeDC(char *label, int num){
     setLabelL(n_label++, s_label);
     createCodeOL(JUMP, s_label);
     printLabel(label); tab(); fprintf(fq, "DC"); tab(); printNumber(num); ln();
+    createCodeL(s_label);
+    return;
+}
+
+void createCodeDCS(char *label, char *string){
+    char s_label[6];
+    setLabelL(n_label++, s_label);
+    createCodeOL(JUMP, s_label);
+    printLabel(label); tab(); fprintf(fq, "DC"); tab(); printLabel(string); ln();
     createCodeL(s_label);
     return;
 }
