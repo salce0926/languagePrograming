@@ -14,7 +14,9 @@ $c	DC	0
 L0004
 L0001
 	LD   	gr1,	gr0
+	PUSH 	0,gr1
 	LAD  	gr1,	1
+	PUSH 	0,gr1
 	POP  	gr1
 	LD   	gr2,	gr0
 	CALL 	WRITEBOOL
@@ -28,10 +30,15 @@ L0006
 	CALL 	WRITEINT
 	CALL 	WRITELINE
 	LAD  	gr1,	1
+	PUSH 	0,gr1
 	LAD  	gr1,	32
+	PUSH 	0,gr1
 	LAD  	gr1,	127
+	PUSH 	0,gr1
 	LAD  	gr1,	16
+	PUSH 	0,gr1
 	LAD  	gr1,	16
+	PUSH 	0,gr1
 	POP  	gr1
 	LD   	gr2,	gr0
 	CALL 	WRITECHAR
@@ -41,5 +48,6 @@ L0008
 	LAD  	gr1,	L0007
 	CALL 	WRITESTR
 	LAD  	gr1,	1
+	PUSH 	0,gr1
 	RET  
 	END

@@ -210,6 +210,12 @@ int subprogram_declaration(){
     scope_p = create_newname(temp_id_name);
     free(temp_id_name);
     temp_id_name = NULL;
+
+    strcpy(subprogramname, "$");
+    strcat(subprogramname, scope_p);
+    createCodeL(subprogramname);
+    createCodeOR(POP, gr2);
+
     if(token == TLPAREN) FCALL(formal_parameters());
     FCALL(register_procedure(temp_procedure));
     temp_procedure = NULL;
@@ -217,9 +223,7 @@ int subprogram_declaration(){
     if(token == TVAR) FCALL(variable_declaration());
     indent_count = 1;
 
-    strcpy(subprogramname, "$");
-    strcat(subprogramname, scope_p);
-    createCodeL(subprogramname);
+    createCodeOIR(PUSH, 0, gr2);
 
     FCALL(compound_statement());
     JUDGE(TSEMI, "Semicolon is not found");
@@ -239,11 +243,15 @@ int procedure_name(){
 }
 
 int formal_parameters(){
+    struct ID *p, *para_idlist;
+    struct REV *q, *rev_root = NULL;
+    char *label;
     JUDGE(TLPAREN, "'(' is not found");
     FCALL(variable_names());
     JUDGE(TCOLON, "Colon is not found");
     FCALL(standard_type());
     FCALL(register_parameter_bytype(temp_id, temp_procedure, temp_type));
+    para_idlist = temp_id;
     temp_id = NULL;
     temp_type = NULL;
     while(token == TSEMI){
@@ -255,6 +263,21 @@ int formal_parameters(){
         temp_id = NULL;
         temp_type = NULL;
     }
+    for(p = para_idlist; p != NULL && p->ispara == 1; p = p->nextp){
+        q = create_newREV();
+        q->idp = p;
+        push_front_REV(&rev_root, q);
+    }
+
+    for(q = rev_root; q != NULL; q = q->nextp){
+        label = create_newlabel(q->idp->name, q->idp->procname);
+        createCodeDC(label, 0);
+        createCodeOR(POP, gr1);
+        createCodeORL(ST, gr1, label);
+        free(label);
+        label = NULL;
+    }
+    rev_root = NULL;
     JUDGE(TRPAREN, "')' is not found");
     return(NORMAL);
 }
@@ -539,6 +562,7 @@ int constant(){
                 createCodeORI(LAD, gr1, string_attr[0]);
         }
     }
+    createCodeOIR(PUSH, 0, gr1);
     return(NORMAL);
 }
 
@@ -740,6 +764,40 @@ void prettyPrint(int token){
         printf("\n");
         is_line_head = 1;
     }
+}
+
+int init_REV(struct REV *p){
+    p->idp = NULL;
+    p->nextp = NULL;
+    return(NORMAL);
+}
+
+struct REV *create_newREV(){
+	struct REV *p;
+	if((p = (struct REV *)malloc(sizeof(struct REV))) == NULL) {
+		printf("can not malloc in create_newREV\n");
+		return(NULL);
+	}
+	init_REV(p);
+	return(p);
+}
+
+int release_REVtab(struct REV **rev_root){
+	struct REV *p, *q;
+
+	for(p = *rev_root; p != NULL; p = q){
+		q = p->nextp;
+		free(p);
+	}
+	
+	*rev_root = NULL;
+	return(NORMAL);
+}
+
+int push_front_REV(struct REV **rev_root, struct REV *front){
+	front->nextp = *rev_root;
+	*rev_root = front;
+	return(NORMAL);
 }
 
 int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p){

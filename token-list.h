@@ -127,6 +127,11 @@ struct PRINTDC{
     struct PRINTDC *nextp;
 };
 
+struct REV{
+	struct ID *idp;
+	struct REV *nextp;
+};
+
 extern char *toOrder(int order);
 extern void setLabelL(int n_label, char s_label[6]);
 extern void tab();
@@ -153,6 +158,10 @@ extern void createCodeEnd();/*TODO:Library*/
 
 extern int error();
 extern void prettyPrint(int);
+extern int init_REV(struct REV *p);
+extern struct REV *create_newREV();
+extern int release_REVtab(struct REV **rev_root);
+extern int push_front_REV(struct REV **rev_root, struct REV *front);
 extern int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p);
 extern int init_printDC(struct PRINTDC *p);
 extern struct PRINTDC *create_newprintDC();

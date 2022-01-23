@@ -247,7 +247,7 @@ int store_id_byname(struct ID **temp_id, char *np){
 		}
 	}
 
-	push_front_id(temp_id, p);
+	push_back_id(temp_id, p);
 	return(NORMAL);
 }
 
