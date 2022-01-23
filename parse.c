@@ -6,6 +6,8 @@
 FILE *fq;
 int n_label = 1;
 struct PRINTDC *list = NULL;
+int label_stack[MAXSTACKSIZE];
+int stack_i = 0;
 
 int token;
 char *scope_p = NULL;
@@ -331,21 +333,33 @@ int statement(){
 
 int condition_statement(){
     struct TYPE *p;
+    char true_label[6], false_label[6];
     JUDGE(TIF, "Keyword 'if' is not found");
     FCALL(expression());
     p = pop_front_type(&temp_type);
     if(p->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
     release_typetab(&p);
+
+    setLabelL(n_label++, false_label);
+    createCodeOR(POP, gr1);
+    createCodeORR(CPA, gr1, gr0);
+    createCodeOL(JZE, false_label);
     JUDGE(TTHEN, "Keyword 'then' is not found");
     FCALL(statement());
-    if(token != TELSE) return(NORMAL);
-    JUDGE(TELSE, "Keyword 'else' is not found");
-    FCALL(statement());
+    setLabelL(n_label++, true_label);
+    createCodeOL(JUMP, true_label);
+    createCodeL(false_label);
+    if(token == TELSE){
+        JUDGE(TELSE, "Keyword 'else' is not found");
+        FCALL(statement());
+    }
+    createCodeL(true_label);
     return(NORMAL);
 }
 
 int iteration_statement(){
     struct TYPE *p;
+    char true_label[6], false_label[6];
     in_while++;
     JUDGE(TWHILE, "Keyword 'while' is not found");
     FCALL(expression());
@@ -353,7 +367,17 @@ int iteration_statement(){
     if(p->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
     release_typetab(&p);
     JUDGE(TDO, "Keyword 'do' is not found");
+    setLabelL(n_label++, true_label);
+    createCodeL(true_label);
+    label_stack[stack_i++] = n_label;
+    setLabelL(n_label++, false_label);
+    createCodeOR(POP, gr1);
+    createCodeORR(CPA, gr1, gr0);
+    createCodeOL(JZE, false_label);
     FCALL(statement());
+    createCodeOL(JUMP, true_label);
+    createCodeL(false_label);
+    stack_i--;
     in_while--;
     return(NORMAL);
 }
@@ -383,13 +407,14 @@ int call_statement(){
     FCALL(ref_newid(proc));
     if(token != TLPAREN){
         FCALL(check_argument(temp_procedure, &temp_argument));
-        return(NORMAL);
+    }else{
+        JUDGE(TLPAREN, "'(' is not found");
+        FCALL(expressions());
+        JUDGE(TRPAREN, "')' is not found");
+        FCALL(check_argument(proc, &temp_argument));
     }
-    JUDGE(TLPAREN, "'(' is not found");
-    FCALL(expressions());
-    JUDGE(TRPAREN, "')' is not found");
-    FCALL(check_argument(proc, &temp_argument));
     release_typetab(&temp_argument);
+    createCodeOL(CALL, create_newlabel(proc->name, NULL));
     return(NORMAL);
 }
 
@@ -640,20 +665,8 @@ int input_statement(){
             JUDGE(TREADLN, "Keyword 'readln' is not found");
         }
     }
-    if(token != TLPAREN) return(NORMAL);
-    JUDGE(TLPAREN, "'(' is not found");
-    FCALL(variable());
-    p = pop_front_type(&temp_type);
-    if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
-    createCodeOR(POP, gr1);
-    if(p->ttype == TPINT){
-        createCodeOL(CALL, "READINT");
-    }else if(p->ttype == TPCHAR){
-        createCodeOL(CALL, "READCHAR");
-    }
-    release_typetab(&p);
-    while(token == TCOMMA){
-        JUDGE(TCOMMA, "Comma is not found");
+    if(token == TLPAREN){
+        JUDGE(TLPAREN, "'(' is not found");
         FCALL(variable());
         p = pop_front_type(&temp_type);
         if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
@@ -664,8 +677,21 @@ int input_statement(){
             createCodeOL(CALL, "READCHAR");
         }
         release_typetab(&p);
+        while(token == TCOMMA){
+            JUDGE(TCOMMA, "Comma is not found");
+            FCALL(variable());
+            p = pop_front_type(&temp_type);
+            if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
+            createCodeOR(POP, gr1);
+            if(p->ttype == TPINT){
+                createCodeOL(CALL, "READINT");
+            }else if(p->ttype == TPCHAR){
+                createCodeOL(CALL, "READCHAR");
+            }
+            release_typetab(&p);
+        }
+        JUDGE(TRPAREN, "')' is not found");
     }
-    JUDGE(TRPAREN, "')' is not found");
     if(has_ln) createCodeOL(CALL, "READLINE");
     return(NORMAL);
 }
@@ -680,14 +706,15 @@ int output_statement(){
             JUDGE(TWRITELN, "Keyword 'writeln' is not found");
         }
     }
-    if(token != TLPAREN) return(NORMAL);
-    JUDGE(TLPAREN, "'(' is not found");
-    FCALL(output_format());
-    while(token == TCOMMA){
-        JUDGE(TCOMMA, "Comma is not found");
+    if(token == TLPAREN){
+        JUDGE(TLPAREN, "'(' is not found");
         FCALL(output_format());
+        while(token == TCOMMA){
+            JUDGE(TCOMMA, "Comma is not found");
+            FCALL(output_format());
+        }
+        JUDGE(TRPAREN, "')' is not found");
     }
-    JUDGE(TRPAREN, "')' is not found");
     if(has_ln) createCodeOL(CALL, "WRITELINE");
     return(NORMAL);
 }

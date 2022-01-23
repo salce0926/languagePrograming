@@ -60,17 +60,26 @@ L0011
 	PUSH 	0,gr1
 	LAD  	gr1,	0
 	PUSH 	0,gr1
+L0012
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0013
 	POP  	gr1
 	CALL 	READINT
 	CALL 	READLINE
 	LAD  	gr1,	1
 	PUSH 	0,gr1
-	RET  
 	JUMP 	L0012
+L0013
+	RET  
+	JUMP 	L0014
 $n	DC	0
-L0012
+L0014
 L0001
+	CALL 	$kazuyomikomi
 	LAD  	gr1,	2
 	PUSH 	0,gr1
+	CALL 	$goukei
+	CALL 	$wakakidasi
 	RET  
 	END

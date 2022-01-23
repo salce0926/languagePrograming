@@ -17,13 +17,17 @@ L0001
 	PUSH 	0,gr1
 	LAD  	gr1,	1
 	PUSH 	0,gr1
+L0005
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0006
 	POP  	gr1
 	LD   	gr2,	gr0
 	CALL 	WRITEBOOL
-	JUMP 	L0006
-L0005	DC	' : '
-L0006
-	LAD  	gr1,	L0005
+	JUMP 	L0008
+L0007	DC	' : '
+L0008
+	LAD  	gr1,	L0007
 	CALL 	WRITESTR
 	POP  	gr1
 	LD   	gr2,	gr0
@@ -31,23 +35,40 @@ L0006
 	CALL 	WRITELINE
 	LAD  	gr1,	1
 	PUSH 	0,gr1
+	JUMP 	L0005
+L0006
+	CALL 	WRITELINE
 	LAD  	gr1,	32
 	PUSH 	0,gr1
 	LAD  	gr1,	127
 	PUSH 	0,gr1
+L0009
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0010
 	LAD  	gr1,	16
 	PUSH 	0,gr1
 	LAD  	gr1,	16
 	PUSH 	0,gr1
 	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0011
+	CALL 	WRITELINE
+	JUMP 	L0012
+L0011
+L0012
+	POP  	gr1
 	LD   	gr2,	gr0
 	CALL 	WRITECHAR
-	JUMP 	L0008
-L0007	DC	' '
-L0008
-	LAD  	gr1,	L0007
+	JUMP 	L0014
+L0013	DC	' '
+L0014
+	LAD  	gr1,	L0013
 	CALL 	WRITESTR
 	LAD  	gr1,	1
 	PUSH 	0,gr1
+	JUMP 	L0009
+L0010
+	CALL 	WRITELINE
 	RET  
 	END

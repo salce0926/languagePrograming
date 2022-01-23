@@ -291,3 +291,5 @@ extern struct ID *sort(struct ID *idroot);
 #define gr5 "gr5"
 #define gr6 "gr6"
 #define gr7 "gr7"
+
+#define MAXSTACKSIZE 1024
