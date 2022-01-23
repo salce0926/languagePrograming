@@ -383,8 +383,12 @@ int iteration_statement(){
 }
 
 int exit_statement(){
+    char label[6];
     if(in_while < 1) return(error("Keyword 'break' must be included in at least one iteration sentence."));
     JUDGE(TBREAK, "Keyword 'break' is not found");
+    setLabelL(label_stack[--stack_i], label);
+    stack_i--;
+    createCodeOL(JUMP, label);
     return(NORMAL);
 }
 
@@ -436,6 +440,7 @@ int expressions(){
 
 int return_statement(){
     JUDGE(TRETURN, "Keyword 'return' is not found");
+    createCodeO(RET);
     return(NORMAL);
 }
 
