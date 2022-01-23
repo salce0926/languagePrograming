@@ -98,6 +98,7 @@ int block(){
 
 int variable_declaration(){
     struct ID *p;
+    char *label;
     indent_count = 1;
     JUDGE(TVAR, "Keyword 'var' is not found");
     FCALL(variable_names());
@@ -105,11 +106,14 @@ int variable_declaration(){
     FCALL(type());
     FCALL(register_id_bytype(temp_id, temp_type));
     for(p = temp_id; p != NULL; p = p->nextp){
+        label = create_newlabel(p->name, p->procname);
         if(is_array(p->itp)){
-            createCodeDS(create_newlabel(p->name, p->procname), p->itp->arraysize);
+            createCodeDS(label, p->itp->arraysize);
         }else{
-            createCodeDC(create_newlabel(p->name, p->procname), 0);
+            createCodeDC(label, 0);
         }
+        free(label);
+        label = NULL;
     }
     temp_id = NULL;
     temp_type = NULL;
@@ -120,11 +124,14 @@ int variable_declaration(){
         FCALL(type());
         FCALL(register_id_bytype(temp_id, temp_type));
         for(p = temp_id; p != NULL; p = p->nextp){
+            label = create_newlabel(p->name, p->procname);
             if(is_array(p->itp)){
-                createCodeDS(create_newlabel(p->name, p->procname), p->itp->arraysize);
+                createCodeDS(label, p->itp->arraysize);
             }else{
-                createCodeDC(create_newlabel(p->name, p->procname), 0);
+                createCodeDC(label, 0);
             }
+            free(label);
+            label = NULL;
         }
         temp_id = NULL;
         temp_type = NULL;
