@@ -60,11 +60,11 @@ L0012
 	POP  	gr1
 	LD   	gr2,	gr0
 	CALL 	WRITECHAR
-	JUMP 	L0014
-L0013	DC	' '
-L0014
-	LAD  	gr1,	L0013
-	CALL 	WRITESTR
+	LAD  	gr1,	32
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr2,	gr0
+	CALL 	WRITECHAR
 	LAD  	gr1,	1
 	PUSH 	0,gr1
 	JUMP 	L0009

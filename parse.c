@@ -728,7 +728,7 @@ int output_format(){
     struct TYPE *p;
     char string[MAXSTRSIZE];
     char s_label[6];
-    if(token == TSTRING){
+    if(token == TSTRING && strlen(string_attr) != 1){
         JUDGE(TSTRING, "String is not found");
         string_attr[1000] = '\0';
         strcpy(string, "'");

@@ -243,6 +243,8 @@ extern void swap(struct ID **p, struct ID **q);
 extern int compare_id(struct ID *p, struct ID *q);
 extern struct ID *sort(struct ID *idroot);
 
+extern void printLibrary();
+
 /*order*/
 #define LD 0x10
 #define ST 0x11
