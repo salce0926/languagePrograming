@@ -150,6 +150,7 @@ extern void createCodeOIR(int order, int index, char *reg);/*   order   index,re
 extern void createCodeORR(int order, char *reg1, char *reg2);/*  order   reg1,   reg2 \n*/
 extern void createCodeORI(int order, char *reg, int index);/*  order   reg1,   index \n*/
 extern void createCodeORIR(int order, char *reg1, int index, char *reg2);/*  order   reg1,   index,reg2 \n*/
+extern void createCodeORLR(int order, char *reg1, char *label, char *reg2);/*  order   reg1,   label,reg2 \n*/
 extern void createCodeStart(char *programname);
 extern void createCodeDC(char *label, int num);
 extern void createCodeDCS(char *label, char *string);
@@ -158,6 +159,8 @@ extern void createCodeEnd();/*TODO:Library*/
 
 extern int error();
 extern void prettyPrint(int);
+extern void pop_value(char *reg, int value_type);
+extern void pop_addr(char *reg, int value_type, char *label);
 extern int init_REV(struct REV *p);
 extern struct REV *create_newREV();
 extern int release_REVtab(struct REV **rev_root);
@@ -295,3 +298,6 @@ extern void printLibrary();
 #define gr7 "gr7"
 
 #define MAXSTACKSIZE 1024
+
+#define ADDR 0
+#define VALUE 1

@@ -8,6 +8,7 @@ int n_label = 1;
 struct PRINTDC *list = NULL;
 int label_stack[MAXSTACKSIZE];
 int stack_i = 0;
+int value_type;
 
 int token;
 char *scope_p = NULL;
@@ -81,7 +82,7 @@ int parse_program(char *filename) {
     JUDGE(TSEMI, "Semicolon is not found");
     FCALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
-    /*printLibrary();*/
+    printLibrary();
     createCodeEnd();
     fclose(fq);
     return(NORMAL);
@@ -395,6 +396,7 @@ int exit_statement(){
 
 int call_statement(){
     struct ID *proc;
+    char *label;
     JUDGE(TCALL, "Keyword 'call' is not found");
     FCALL(procedure_name());
     proc = search_id_byname(globalidroot, temp_id_name, NULL);
@@ -419,22 +421,32 @@ int call_statement(){
         FCALL(check_argument(proc, &temp_argument));
     }
     release_typetab(&temp_argument);
-    createCodeOL(CALL, create_newlabel(proc->name, NULL));
+    label = create_newlabel(proc->name, NULL);
+    createCodeOL(CALL, label);
+    free(label);
+    label = NULL;
     return(NORMAL);
 }
 
 int expressions(){
     struct TYPE *p;
+    char s_label[6];
     FCALL(expression());
     p = pop_front_type(&temp_type);
     FCALL(store_argument(&temp_argument, p->ttype));
     release_typetab(&p);
+    setLabelL(n_label++, s_label);
+    pop_addr(gr1, value_type, s_label);
+    createCodeOIR(PUSH, 0, gr1);
     while(token == TCOMMA){
         JUDGE(TCOMMA, "Comma is not found");
         FCALL(expression());
         p = pop_front_type(&temp_type);
         FCALL(store_argument(&temp_argument, p->ttype));
         release_typetab(&p);
+        setLabelL(n_label++, s_label);
+        pop_addr(gr1, value_type, s_label);
+        createCodeOIR(PUSH, 0, gr1);
     }
     return(NORMAL);
 }
@@ -449,6 +461,9 @@ int assignment_statement(){
     FCALL(left_part());
     JUDGE(TASSIGN, "':=' is not found");
     FCALL(expression());
+    pop_value(gr1, value_type);
+    pop_addr(gr2, ADDR, NULL);
+    createCodeORIR(ST, gr1, 0, gr2);
     FCALL(check_operand_type(&temp_type));
     temp_type = NULL;
     return(NORMAL);
@@ -462,6 +477,7 @@ int left_part(){
 int variable(){
     struct ID *list, *p;
     struct TYPE *q;
+    char *label;
     FCALL(variable_name());
     list = *get_idroot();
     p = search_id_byname(list, temp_id_name, scope_p);
@@ -476,38 +492,87 @@ int variable(){
         FCALL(store_array_type(&temp_type, p->itp->arraysize));
     }
     FCALL(ref_newid(p));
-    if(token != TLSQPAREN) return(NORMAL);
-    if(!is_array(p->itp)){
-        return(error("the type of this id must be array\n"));
+        label = create_newlabel(p->name, p->procname);
+        if(p->ispara){
+            createCodeORL(LD, gr1, label);
+        }else{
+            createCodeORL(LAD, gr1, label);
+        }
+        createCodeOIR(PUSH, 0, gr1);
+    if(token == TLSQPAREN){
+        if(!is_array(p->itp)){
+            return(error("the type of this id must be array\n"));
+        }
+        JUDGE(TLSQPAREN, "'[' is not found");
+        FCALL(expression());
+        q = pop_front_type(&temp_type);
+        if(q->ttype != TPINT) return(error("the type of index must be integer\n"));
+        release_typetab(&q);
+        JUDGE(TRSQPAREN, "']' is not found");
+            createCodeOR(POP, gr1);
+            createCodeORR(LD, gr3, gr1);
+            createCodeORI(LAD, gr2, temp_type->arraysize - 1);
+            createCodeORR(CPA, gr1, gr2);
+            createCodeOL(JPL, "EROV");
+            createCodeOR(POP, gr1);
+            createCodeORLR(LD, gr1, label, gr3);
+            createCodeOIR(PUSH, 0, gr1);
+        temp_type->arraysize = -1;
     }
-    JUDGE(TLSQPAREN, "'[' is not found");
-    FCALL(expression());
-    q = pop_front_type(&temp_type);
-    if(q->ttype != TPINT) return(error("the type of index must be integer\n"));
-    release_typetab(&q);
-    JUDGE(TRSQPAREN, "']' is not found");
-    temp_type->arraysize = -1;
+        free(label);
+        label = NULL;
     return(NORMAL);
 }
 
 int expression(){
     struct TYPE *p;
+    int l_value_type, r_value_type, op;
+    char true_label[6], false_label[6];
     FCALL(simple_expression());
+    l_value_type = value_type;
     while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
+        op = token;
         FCALL(relational_operator());
         FCALL(simple_expression());
         FCALL(check_operand_type(&temp_type));
         p = pop_front_type(&temp_type);
         release_typetab(&p);
         FCALL(store_standard_type(&temp_type, TPBOOL));
+        r_value_type = value_type;
+        pop_value(gr2, r_value_type);
+        pop_value(gr1, l_value_type);
+        setLabelL(n_label++, true_label);
+        setLabelL(n_label++, false_label);
+        if(op == TNOTEQ){
+            createCodeOL(JNZ, true_label);
+        }else if(op == TEQUAL || op == TLEEQ || op == TGREQ){
+            createCodeOL(JZE, true_label);
+        }
+        if(op == TGR || op == TGREQ){
+            createCodeOL(JPL, true_label);
+        }else if(op == TLE || op == TLEEQ){
+            createCodeOL(JMI, true_label);
+        }
+        createCodeORR(LAD, gr1, gr0);
+        createCodeOL(JUMP, false_label);
+        createCodeL(true_label);
+        createCodeORI(LAD, gr1, 1);
+        createCodeL(false_label);
+        createCodeOIR(PUSH, 0, gr1);
+        value_type = VALUE;
     }
     return(NORMAL);
 }
 
 int simple_expression(){
+    int l_value_type, r_value_type, op;
     int check = 0;
     if(token == TPLUS || token == TMINUS){
         check = 1;
+        createCodeORI(LAD, gr1, 0);
+        createCodeOIR(PUSH, 0, gr1);
+        l_value_type = VALUE;
+        op = token;
         if(token == TPLUS){
             JUDGE(TPLUS, "'+' is not found");
         }else if(token == TMINUS){
@@ -518,37 +583,88 @@ int simple_expression(){
     FCALL(term());
     if(check){
         FCALL(check_operand_type(&temp_type));
+        r_value_type = value_type;
+        pop_value(gr2, r_value_type);
+        pop_value(gr1, l_value_type);
+        if(token == TPLUS){
+            createCodeORR(ADDA, gr1, gr2);
+            createCodeOL(JOV, "EOVF");
+        }else if(token == TMINUS){
+            createCodeORR(SUBA, gr1, gr2);
+            createCodeOL(JOV, "EOVF");
+        }
+        createCodeOIR(PUSH, 0, gr1);
+        value_type = VALUE;
+    }else{
+        l_value_type = value_type;
     }
     while(token == TPLUS || token == TMINUS || token == TOR){
+        op = token;
         FCALL(additive_operator());
         FCALL(term());
         FCALL(check_operand_type(&temp_type));
+        r_value_type = value_type;
+        pop_value(gr2, r_value_type);
+        pop_value(gr1, l_value_type);
+        if(token == TPLUS){
+            createCodeORR(ADDA, gr1, gr2);
+            createCodeOL(JOV, "EOVF");
+        }else if(token == TMINUS){
+            createCodeORR(SUBA, gr1, gr2);
+            createCodeOL(JOV, "EOVF");
+        }else if(op == TOR){
+            createCodeORR(OR, gr1, gr2);
+        }
+        createCodeOIR(PUSH, 0, gr1);
+        value_type = VALUE;
     }
     return(NORMAL);
 }
 
 int term(){
+    int l_value_type, r_value_type, op;
     FCALL(factor());
+    l_value_type = value_type;
     while(token == TSTAR || token == TDIV || token == TAND){
+        op = token;
         FCALL(multiplicative_operator());
         FCALL(factor());
         FCALL(check_operand_type(&temp_type));
+        r_value_type = value_type;
+        pop_value(gr2, r_value_type);
+        pop_value(gr1, l_value_type);
+        if(op == TSTAR){
+            createCodeORR(MULA, gr1, gr2);
+            createCodeOL(JOV, "EOVF");
+        }else if(op == TDIV){
+            createCodeORR(DIVA, gr1, gr2);
+            createCodeOL(JOV, "E0DIV");
+        }else if(op == TAND){
+            createCodeORR(AND, gr1, gr2);
+        }
+        createCodeOIR(PUSH, 0, gr1);
+        value_type = VALUE;
     }
     return(NORMAL);
 }
 
 int factor(){
     struct TYPE *p;
+    int type;
+    char s_label[6];
     if(token == TNAME){
         FCALL(variable());
+        value_type = ADDR;
     }
     else if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         FCALL(constant());
+        value_type = VALUE;
     }
     else if(token == TLPAREN){
         JUDGE(TLPAREN, "'(' is not found");
         FCALL(expression());
         JUDGE(TRPAREN, "')' is not found");
+        value_type = VALUE;
     }
     else if(token == TNOT){
         JUDGE(TNOT, "Keyword 'not' is not found");
@@ -556,15 +672,31 @@ int factor(){
         if(temp_type->ttype != TPBOOL){
             return(error("unsupported operand type for 'not'\n"));
         }
+        createCodeOR(POP, gr1);
+        createCodeORI(LAD, gr2, 1);
+        createCodeORR(XOR, gr1, gr2);
+        createCodeOIR(PUSH, 0, gr1);
+        value_type = VALUE;
     }
     else if(token == TINTEGER || token == TBOOLEAN || token == TCHAR){
         FCALL(standard_type());
+        type = temp_type->ttype;
         JUDGE(TLPAREN, "'(' is not found");
         FCALL(expression());
         JUDGE(TRPAREN, "')' is not found");
         p = pop_front_type(&temp_type);
         if(is_array(p)) return(error("using array type as standard type is not allowed\n"));
         release_typetab(&p);
+        if(type == TPBOOL){
+            setLabelL(n_label++, s_label);
+            createCodeOR(POP, gr1);
+            createCodeORR(CPA, gr1, gr0);
+            createCodeOL(JZE, s_label);
+            createCodeORI(LAD, gr1, 1);
+            createCodeL(s_label);
+            createCodeOIR(PUSH, 0, gr1);
+        }
+        value_type = VALUE;
     }
     else return(error("Factor is not found"));
     return(NORMAL);
@@ -676,7 +808,7 @@ int input_statement(){
         FCALL(variable());
         p = pop_front_type(&temp_type);
         if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
-        createCodeOR(POP, gr1);
+        pop_addr(gr1, ADDR, NULL);
         if(p->ttype == TPINT){
             createCodeOL(CALL, "READINT");
         }else if(p->ttype == TPCHAR){
@@ -688,7 +820,7 @@ int input_statement(){
             FCALL(variable());
             p = pop_front_type(&temp_type);
             if(p->ttype != TPINT && p->ttype != TPCHAR) return(error("the type of variable must be integer or char\n"));
-            createCodeOR(POP, gr1);
+            pop_addr(gr1, ADDR, NULL);
             if(p->ttype == TPINT){
                 createCodeOL(CALL, "READINT");
             }else if(p->ttype == TPCHAR){
@@ -797,6 +929,24 @@ void prettyPrint(int token){
         printf("\n");
         is_line_head = 1;
     }
+}
+
+void pop_value(char *reg, int value_type){
+    createCodeOR(POP, reg);
+    if (value_type == ADDR) {
+        createCodeORIR(LD, reg, 0, reg);
+    }
+    return;
+}
+
+void pop_addr(char *reg, int value_type, char *label){
+    createCodeOR(POP, reg);
+    if (value_type == VALUE) {
+        createCodeDC(label, 0);
+        createCodeORL(ST, reg, label);
+        createCodeORL(LAD, reg, label);
+    }
+    return;
 }
 
 int init_REV(struct REV *p){
@@ -971,6 +1121,11 @@ void createCodeORI(int order, char *reg, int index){/*  order   reg,   index \n*
 
 void createCodeORIR(int order, char *reg1, int index, char *reg2){/*  order   reg1,   index,reg2 \n*/
     tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab();printNumber(index); comma(); printRegister(reg2); ln();
+    return; 
+}
+
+void createCodeORLR(int order, char *reg1, char *label, char *reg2){/*  order   reg1,   label,reg2 \n*/
+    tab(); printOrder(order); tab(); printRegister(reg1); comma(); tab();printLabel(label); comma(); printRegister(reg2); ln();
     return; 
 }
 
