@@ -81,6 +81,7 @@ int parse_program(char *filename) {
     JUDGE(TSEMI, "Semicolon is not found");
     FCALL(block());
     JUDGE(TDOT, "Period is not found at the end of program");
+    /*printLibrary();*/
     createCodeEnd();
     fclose(fq);
     return(NORMAL);
