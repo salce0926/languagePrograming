@@ -1,0 +1,17 @@
+$$all	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+	JUMP 	L0002
+$unused1	DC	0
+L0002
+	JUMP 	L0003
+$UnusedArrayForTest	DS	200
+L0003
+$unused
+	POP  	gr2
+	PUSH 	0,gr2
+	RET  
+$gcmlcm
+	POP  	gr2

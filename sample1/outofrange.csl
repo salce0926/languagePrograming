@@ -1,0 +1,69 @@
+$$outofrange	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+	JUMP 	L0002
+$x	DC	0
+L0002
+	JUMP 	L0003
+$high	DC	0
+L0003
+	JUMP 	L0004
+$low	DC	0
+L0004
+	JUMP 	L0005
+$mid	DC	0
+L0005
+	JUMP 	L0006
+$can	DC	0
+L0006
+L0001
+	JUMP 	L0008
+L0007	DC	'Input x for calculating root x'
+L0008
+	LAD  	gr1,	L0007
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	CALL 	WRITELINE
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr1
+	CALL 	READINT
+	CALL 	READLINE
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	LAD  	gr1,	0
+	PUSH 	0,gr1
+	POP  	gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	CPA  	gr1,	gr2
+	JMI  	L0009
+	LD   	gr1,	gr0
+	JUMP 	L0010
+L0009
+	LAD  	gr1,	1
+L0010
+	PUSH 	0,gr1
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0011
+	JUMP 	L0013
+L0012	DC	'can not calculate a root of negative number'
+L0013
+	LAD  	gr1,	L0012
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	CALL 	WRITELINE
+	JUMP 	L0014
+L0011
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	LAD  	gr1,	0
+	PUSH 	0,gr1
+	POP  	gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+	LAD  	gr1,	$high
+	PUSH 	0,gr1

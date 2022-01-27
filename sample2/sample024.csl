@@ -1,0 +1,12 @@
+$$Write	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+L0001
+	JUMP 	L0003
+L0002	DC	's'
+L0003
+	LAD  	gr1,	L0002
+	LD   	gr2,	gr0
+	CALL 	WRITESTR

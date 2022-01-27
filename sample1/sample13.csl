@@ -1,144 +1,96 @@
-$$typeconv	START
+$$sample13	START
 	LAD  	gr0,	0
 	CALL 	L0001
 	CALL 	FLUSH
 	SVC  	0
 	JUMP 	L0002
-$i	DC	0
+$x	DC	0
 L0002
 	JUMP 	L0003
-$b	DC	0
+$high	DC	0
 L0003
 	JUMP 	L0004
-$c	DC	0
+$low	DC	0
 L0004
-L0001
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LD   	gr1,	gr0
-	PUSH 	0,gr1
-	POP  	gr1
-	PUSH 	0,gr1
-	POP  	gr1
-	POP  	gr2
-	ST   	gr1,	0,gr2
+	JUMP 	L0005
+$mid	DC	0
 L0005
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	1
-	PUSH 	0,gr1
-	POP  	gr1
-	PUSH 	0,gr1
-	POP  	gr2
-	POP  	gr1
-	LD   	gr1,	0,gr1
-	CPA  	gr1,	gr2
-	JZE  	L0006
-	JMI  	L0006
-	LD   	gr1,	gr0
-	JUMP 	L0007
+	JUMP 	L0006
+$can	DC	0
 L0006
-	LAD  	gr1,	1
-L0007
-	PUSH 	0,gr1
-	POP  	gr1
-	CPA  	gr1,	gr0
-	JZE  	L0008
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr1,	0,gr1
-	CPA  	gr1,	gr0
-	JZE  	L0009
-	LAD  	gr1,	1
-L0009
-	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr2,	gr0
-	CALL 	WRITEBOOL
-	JUMP 	L0011
-L0010	DC	' : '
-L0011
-	LAD  	gr1,	L0010
+L0001
+	JUMP 	L0008
+L0007	DC	'Input x for calculating root x'
+L0008
+	LAD  	gr1,	L0007
 	LD   	gr2,	gr0
 	CALL 	WRITESTR
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr1,	0,gr1
-	LD   	gr2,	gr0
-	CALL 	WRITEINT
 	CALL 	WRITELINE
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	1
-	PUSH 	0,gr1
-	POP  	gr2
-	POP  	gr1
-	LD   	gr1,	0,gr1
-	ADDA 	gr1,	gr2
-	JOV  	EOVF
+	LAD  	gr1,	$x
 	PUSH 	0,gr1
 	POP  	gr1
-	POP  	gr2
-	ST   	gr1,	0,gr2
-	JUMP 	L0005
-L0008
-	CALL 	WRITELINE
-	LAD  	gr1,	$i
+	CALL 	READINT
+	CALL 	READLINE
+	LAD  	gr1,	$x
 	PUSH 	0,gr1
-	LAD  	gr1,	32
-	PUSH 	0,gr1
-	POP  	gr1
-	PUSH 	0,gr1
-	POP  	gr1
-	POP  	gr2
-	ST   	gr1,	0,gr2
-L0012
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	127
+	LAD  	gr1,	0
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
 	LD   	gr1,	0,gr1
 	CPA  	gr1,	gr2
-	JMI  	L0013
+	JMI  	L0009
 	LD   	gr1,	gr0
-	JUMP 	L0014
-L0013
+	JUMP 	L0010
+L0009
 	LAD  	gr1,	1
-L0014
+L0010
 	PUSH 	0,gr1
 	POP  	gr1
 	CPA  	gr1,	gr0
-	JZE  	L0015
-	LAD  	gr1,	$i
+	JZE  	L0011
+	JUMP 	L0013
+L0012	DC	'can not calculate a root of negative number'
+L0013
+	LAD  	gr1,	L0012
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	CALL 	WRITELINE
+	JUMP 	L0014
+L0011
+	LAD  	gr1,	$low
 	PUSH 	0,gr1
-	LAD  	gr1,	16
+	LAD  	gr1,	0
 	PUSH 	0,gr1
-	POP  	gr2
 	POP  	gr1
-	LD   	gr1,	0,gr1
-	DIVA 	gr1,	gr2
-	JOV  	E0DIV
-	PUSH 	0,gr1
-	LAD  	gr1,	16
-	PUSH 	0,gr1
 	POP  	gr2
-	POP  	gr1
-	MULA 	gr1,	gr2
-	JOV  	EOVF
+	ST   	gr1,	0,gr2
+	LAD  	gr1,	$high
 	PUSH 	0,gr1
-	LAD  	gr1,	$i
+	LAD  	gr1,	181
+	PUSH 	0,gr1
+	POP  	gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+L0015
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	LAD  	gr1,	$low
 	PUSH 	0,gr1
 	POP  	gr2
 	LD   	gr2,	0,gr2
 	POP  	gr1
+	LD   	gr1,	0,gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	LAD  	gr1,	2
+	PUSH 	0,gr1
+	POP  	gr2
+	POP  	gr1
 	CPA  	gr1,	gr2
 	JZE  	L0016
+	JPL  	L0016
 	LD   	gr1,	gr0
 	JUMP 	L0017
 L0016
@@ -148,41 +100,275 @@ L0017
 	POP  	gr1
 	CPA  	gr1,	gr0
 	JZE  	L0018
-	CALL 	WRITELINE
-	JUMP 	L0019
-L0018
-L0019
-	LAD  	gr1,	$i
+	LAD  	gr1,	$mid
 	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr1,	0,gr1
+	LAD  	gr1,	$high
 	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr2,	gr0
-	CALL 	WRITECHAR
-	LAD  	gr1,	32
-	PUSH 	0,gr1
-	POP  	gr1
-	LD   	gr2,	gr0
-	CALL 	WRITECHAR
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	$i
-	PUSH 	0,gr1
-	LAD  	gr1,	1
+	LAD  	gr1,	$low
 	PUSH 	0,gr1
 	POP  	gr2
+	LD   	gr2,	0,gr2
 	POP  	gr1
 	LD   	gr1,	0,gr1
 	ADDA 	gr1,	gr2
 	JOV  	EOVF
 	PUSH 	0,gr1
+	LAD  	gr1,	2
+	PUSH 	0,gr1
+	POP  	gr2
+	POP  	gr1
+	DIVA 	gr1,	gr2
+	JOV  	E0DIV
+	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2
 	ST   	gr1,	0,gr2
-	JUMP 	L0012
-L0015
+	LAD  	gr1,	$can
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	MULA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	POP  	gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	LAD  	gr1,	$can
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	CPA  	gr1,	gr2
+	JMI  	L0019
+	LD   	gr1,	gr0
+	JUMP 	L0020
+L0019
+	LAD  	gr1,	1
+L0020
+	PUSH 	0,gr1
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0021
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+	JUMP 	L0022
+L0021
+	LAD  	gr1,	$can
+	PUSH 	0,gr1
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	CPA  	gr1,	gr2
+	JMI  	L0023
+	LD   	gr1,	gr0
+	JUMP 	L0024
+L0023
+	LAD  	gr1,	1
+L0024
+	PUSH 	0,gr1
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0025
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+	JUMP 	L0026
+L0025
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	LAD  	gr1,	$mid
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	POP  	gr2
+	ST   	gr1,	0,gr2
+L0026
+L0022
+	JUMP 	L0015
+L0018
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	CPA  	gr1,	gr2
+	JZE  	L0027
+	LD   	gr1,	gr0
+	JUMP 	L0028
+L0027
+	LAD  	gr1,	1
+L0028
+	PUSH 	0,gr1
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0029
+	JUMP 	L0031
+L0030	DC	'root '
+L0031
+	LAD  	gr1,	L0030
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	JUMP 	L0033
+L0032	DC	' = '
+L0033
+	LAD  	gr1,	L0032
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
 	CALL 	WRITELINE
+	JUMP 	L0034
+L0029
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	MULA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	POP  	gr2
+	LD   	gr2,	0,gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	MULA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	POP  	gr2
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
+	PUSH 	0,gr1
+	POP  	gr2
+	POP  	gr1
+	CPA  	gr1,	gr2
+	JPL  	L0035
+	LD   	gr1,	gr0
+	JUMP 	L0036
+L0035
+	LAD  	gr1,	1
+L0036
+	PUSH 	0,gr1
+	POP  	gr1
+	CPA  	gr1,	gr0
+	JZE  	L0037
+	JUMP 	L0039
+L0038	DC	'root '
+L0039
+	LAD  	gr1,	L0038
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	JUMP 	L0041
+L0040	DC	' = '
+L0041
+	LAD  	gr1,	L0040
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$low
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	CALL 	WRITELINE
+	JUMP 	L0042
+L0037
+	JUMP 	L0044
+L0043	DC	'root '
+L0044
+	LAD  	gr1,	L0043
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$x
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	JUMP 	L0046
+L0045	DC	' = '
+L0046
+	LAD  	gr1,	L0045
+	LD   	gr2,	gr0
+	CALL 	WRITESTR
+	LAD  	gr1,	$high
+	PUSH 	0,gr1
+	POP  	gr1
+	LD   	gr1,	0,gr1
+	LD   	gr2,	gr0
+	CALL 	WRITEINT
+	CALL 	WRITELINE
+L0042
+L0034
+L0014
 	RET  
 EOVF
 	CALL WRITELINE

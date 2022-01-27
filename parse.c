@@ -343,7 +343,7 @@ int condition_statement(){
     release_typetab(&p);
 
     setLabelL(n_label++, false_label);
-    createCodeOR(POP, gr1);
+    pop_value(gr1, value_type);
     createCodeORR(CPA, gr1, gr0);
     createCodeOL(JZE, false_label);
     JUDGE(TTHEN, "Keyword 'then' is not found");
@@ -364,16 +364,16 @@ int iteration_statement(){
     char true_label[6], false_label[6];
     in_while++;
     JUDGE(TWHILE, "Keyword 'while' is not found");
+    setLabelL(n_label++, true_label);
+    createCodeL(true_label);
     FCALL(expression());
     p = pop_front_type(&temp_type);
     if(p->ttype != TPBOOL) return(error("the type of expressions must be boolean"));
     release_typetab(&p);
     JUDGE(TDO, "Keyword 'do' is not found");
-    setLabelL(n_label++, true_label);
-    createCodeL(true_label);
     label_stack[stack_i++] = n_label;
     setLabelL(n_label++, false_label);
-    createCodeOR(POP, gr1);
+    pop_value(gr1, value_type);
     createCodeORR(CPA, gr1, gr0);
     createCodeOL(JZE, false_label);
     FCALL(statement());
@@ -529,8 +529,8 @@ int expression(){
     int l_value_type, r_value_type, op;
     char true_label[6], false_label[6];
     FCALL(simple_expression());
-    l_value_type = value_type;
     while(token == TEQUAL || token == TNOTEQ || token == TLE || token == TLEEQ || token == TGR || token == TGREQ){
+        l_value_type = value_type;
         op = token;
         FCALL(relational_operator());
         FCALL(simple_expression());
@@ -543,6 +543,7 @@ int expression(){
         pop_value(gr1, l_value_type);
         setLabelL(n_label++, true_label);
         setLabelL(n_label++, false_label);
+        createCodeORR(CPA, gr1, gr2);
         if(op == TNOTEQ){
             createCodeOL(JNZ, true_label);
         }else if(op == TEQUAL || op == TLEEQ || op == TGREQ){
@@ -553,7 +554,7 @@ int expression(){
         }else if(op == TLE || op == TLEEQ){
             createCodeOL(JMI, true_label);
         }
-        createCodeORR(LAD, gr1, gr0);
+        createCodeORR(LD, gr1, gr0);
         createCodeOL(JUMP, false_label);
         createCodeL(true_label);
         createCodeORI(LAD, gr1, 1);
@@ -595,10 +596,9 @@ int simple_expression(){
         }
         createCodeOIR(PUSH, 0, gr1);
         value_type = VALUE;
-    }else{
-        l_value_type = value_type;
     }
     while(token == TPLUS || token == TMINUS || token == TOR){
+        l_value_type = value_type;
         op = token;
         FCALL(additive_operator());
         FCALL(term());
@@ -606,10 +606,10 @@ int simple_expression(){
         r_value_type = value_type;
         pop_value(gr2, r_value_type);
         pop_value(gr1, l_value_type);
-        if(token == TPLUS){
+        if(op == TPLUS){
             createCodeORR(ADDA, gr1, gr2);
             createCodeOL(JOV, "EOVF");
-        }else if(token == TMINUS){
+        }else if(op == TMINUS){
             createCodeORR(SUBA, gr1, gr2);
             createCodeOL(JOV, "EOVF");
         }else if(op == TOR){
@@ -624,8 +624,8 @@ int simple_expression(){
 int term(){
     int l_value_type, r_value_type, op;
     FCALL(factor());
-    l_value_type = value_type;
     while(token == TSTAR || token == TDIV || token == TAND){
+        l_value_type = value_type;
         op = token;
         FCALL(multiplicative_operator());
         FCALL(factor());
@@ -672,7 +672,7 @@ int factor(){
         if(temp_type->ttype != TPBOOL){
             return(error("unsupported operand type for 'not'\n"));
         }
-        createCodeOR(POP, gr1);
+        pop_value(gr1, value_type);
         createCodeORI(LAD, gr2, 1);
         createCodeORR(XOR, gr1, gr2);
         createCodeOIR(PUSH, 0, gr1);
@@ -689,11 +689,14 @@ int factor(){
         release_typetab(&p);
         if(type == TPBOOL){
             setLabelL(n_label++, s_label);
-            createCodeOR(POP, gr1);
+            pop_value(gr1, value_type);
             createCodeORR(CPA, gr1, gr0);
             createCodeOL(JZE, s_label);
             createCodeORI(LAD, gr1, 1);
             createCodeL(s_label);
+            createCodeOIR(PUSH, 0, gr1);
+        }else{
+            pop_value(gr1, value_type);
             createCodeOIR(PUSH, 0, gr1);
         }
         value_type = VALUE;
@@ -870,13 +873,14 @@ int output_format(){
         setLabelL(n_label++, s_label);
         createCodeDCS(s_label, string);
         createCodeORL(LAD, gr1, s_label);
+        createCodeORR(LD, gr2, gr0);
         createCodeOL(CALL, "WRITESTR");
         return(NORMAL);
     }
     FCALL(expression());
     p = pop_front_type(&temp_type);
     if(is_array(p)) return(error("using array type as output format is not allowed\n"));
-    createCodeOR(POP, gr1);
+    pop_value(gr1, value_type);
     if(token != TCOLON){
         createCodeORR(LD, gr2, gr0);
     }else{

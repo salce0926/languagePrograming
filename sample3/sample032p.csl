@@ -1,0 +1,8 @@
+$$rcall	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+$f
+	POP  	gr2
+	PUSH 	0,gr2

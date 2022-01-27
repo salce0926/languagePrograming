@@ -1,0 +1,12 @@
+$$assignchar	START
+	LAD  	gr0,	0
+	CALL 	L0001
+	CALL 	FLUSH
+	SVC  	0
+	JUMP 	L0002
+$x	DC	0
+L0002
+	JUMP 	L0003
+$y	DC	0
+L0003
+L0001
