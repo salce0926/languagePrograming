@@ -23,7 +23,7 @@ L0005
 	CALL 	WRITELINE
 	LD   	gr1,	$a%p
 	PUSH 	0,gr1
-	LAD  	gr1,	101
+	LAD  	gr1,	97
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2

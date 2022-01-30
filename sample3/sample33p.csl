@@ -83,7 +83,7 @@ L0012
 	JZE  	L0013
 	LD   	gr1,	$a%p
 	PUSH 	0,gr1
-	LAD  	gr1,	101
+	LAD  	gr1,	98
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2

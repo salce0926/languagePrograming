@@ -59,7 +59,7 @@ int main(int nc, char *np[]) {
     }
 
 	token = scan();
-	if(parse_program(np[1]) != ERROR) print_alltab();
+	parse_program(np[1]);
     return 0;
 }
 

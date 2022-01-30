@@ -14,7 +14,7 @@ L0001
 	CALL 	READLINE
 	LAD  	gr1,	$ch
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	97
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1

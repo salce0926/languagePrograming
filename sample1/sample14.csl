@@ -113,7 +113,7 @@ L0015
 L0016
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	43
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -149,7 +149,7 @@ L0019
 L0020
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	45
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -185,7 +185,7 @@ L0023
 L0024
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	42
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -221,7 +221,7 @@ L0027
 L0028
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	47
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1

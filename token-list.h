@@ -121,12 +121,6 @@ extern int output_format();
 extern int empty_statement();
 extern void println();
 
-struct PRINTDC{
-    char *label;
-    char *value;
-    struct PRINTDC *nextp;
-};
-
 struct REV{
 	struct ID *idp;
 	struct REV *nextp;
@@ -155,7 +149,7 @@ extern void createCodeStart(char *programname);
 extern void createCodeDC(char *label, int num);
 extern void createCodeDCS(char *label, char *string);
 extern void createCodeDS(char *label, int num);
-extern void createCodeEnd();/*TODO:Library*/
+extern void createCodeEnd();
 
 extern int error();
 extern void prettyPrint(int);
@@ -165,11 +159,7 @@ extern int init_REV(struct REV *p);
 extern struct REV *create_newREV();
 extern int release_REVtab(struct REV **rev_root);
 extern int push_front_REV(struct REV **rev_root, struct REV *front);
-extern int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p);
-extern int init_printDC(struct PRINTDC *p);
-extern struct PRINTDC *create_newprintDC();
 extern char *create_newlabel(char *name, char *procname);
-extern void caslPrint(char* filename);
 
 /*Type*/
 #define TPINT	1

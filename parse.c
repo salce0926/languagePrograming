@@ -5,7 +5,6 @@
 
 FILE *fq;
 int n_label = 1;
-struct PRINTDC *list = NULL;
 int label_stack[MAXSTACKSIZE];
 int stack_i = 0;
 int value_type;
@@ -389,7 +388,7 @@ int exit_statement(){
     if(in_while < 1) return(error("Keyword 'break' must be included in at least one iteration sentence."));
     JUDGE(TBREAK, "Keyword 'break' is not found");
     setLabelL(label_stack[--stack_i], label);
-    stack_i--;
+    stack_i++;
     createCodeOL(JUMP, label);
     return(NORMAL);
 }
@@ -587,10 +586,10 @@ int simple_expression(){
         r_value_type = value_type;
         pop_value(gr2, r_value_type);
         pop_value(gr1, l_value_type);
-        if(token == TPLUS){
+        if(op == TPLUS){
             createCodeORR(ADDA, gr1, gr2);
             createCodeOL(JOV, "EOVF");
-        }else if(token == TMINUS){
+        }else if(op == TMINUS){
             createCodeORR(SUBA, gr1, gr2);
             createCodeOL(JOV, "EOVF");
         }
@@ -707,6 +706,7 @@ int factor(){
 
 int constant(){
     int length;
+    char c;
     if(token == TNUMBER || token == TFALSE || token == TTRUE || token == TSTRING){
         if(token == TNUMBER){
             JUDGE(TNUMBER, "Number is not found");
@@ -722,10 +722,11 @@ int constant(){
                 createCodeORI(LAD, gr1, 1);
         }else if(token == TSTRING){
             length = strlen(string_attr);
+            c = string_attr[0];
             JUDGE(TSTRING, "String is not found");
             if(length != 1) return(error("the length of the string must be 1\n"));
             FCALL(store_standard_type(&temp_type, TPCHAR));
-                createCodeORI(LAD, gr1, string_attr[0]);
+                createCodeORI(LAD, gr1, c);
         }
     }
     createCodeOIR(PUSH, 0, gr1);
@@ -987,29 +988,6 @@ int push_front_REV(struct REV **rev_root, struct REV *front){
 	return(NORMAL);
 }
 
-int push_front_printDC(struct PRINTDC **idroot, struct PRINTDC *p){
-	p->nextp = *idroot;
-	*idroot = p;
-	return(NORMAL);
-}
-
-int init_printDC(struct PRINTDC *p){
-    p->label = NULL;
-    p->value = NULL;
-    p->nextp = NULL;
-    return(NORMAL);
-}
-
-struct PRINTDC *create_newprintDC(){
-	struct PRINTDC *p;
-	if((p = (struct PRINTDC *)malloc(sizeof(struct PRINTDC))) == NULL) {
-		printf("can not malloc in create_newprintDC\n");
-		return(NULL);
-	}
-	init_printDC(p);
-	return(p);
-}
-
 char *create_newlabel(char *name, char *procname){
 	char *p;
 	if(name == NULL){
@@ -1173,7 +1151,7 @@ void createCodeDS(char *label, int num){
     return;
 }
 
-void createCodeEnd(){/*TODO:Library*/
+void createCodeEnd(){
     tab(); fprintf(fq, "END"); ln();
     return;
 }

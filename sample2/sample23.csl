@@ -19,7 +19,7 @@ L0001
 	ST   	gr1,	0,gr2
 	LAD  	gr1,	$y
 	PUSH 	0,gr1
-	LAD  	gr1,	101
+	LAD  	gr1,	89
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2

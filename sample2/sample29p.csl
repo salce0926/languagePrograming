@@ -199,6 +199,8 @@ L0018
 	POP  	gr2
 	LD   	gr2,	0,gr2
 	POP  	gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2
@@ -539,6 +541,8 @@ L0074
 	POP  	gr2
 	LD   	gr2,	0,gr2
 	POP  	gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2
@@ -552,6 +556,8 @@ L0074
 	POP  	gr2
 	LD   	gr2,	0,gr2
 	POP  	gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
 	PUSH 	0,gr1
 	POP  	gr1
 	POP  	gr2
@@ -773,6 +779,8 @@ L0096
 	POP  	gr2
 	LD   	gr2,	0,gr2
 	POP  	gr1
+	SUBA 	gr1,	gr2
+	JOV  	EOVF
 	PUSH 	0,gr1
 	POP  	gr1
 	JUMP 	L0100
@@ -1345,7 +1353,7 @@ L0173
 L0174
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	43
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -1382,7 +1390,7 @@ L0177
 L0178
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	45
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -1419,7 +1427,7 @@ L0185
 L0186
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	42
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
@@ -1456,7 +1464,7 @@ L0193
 L0194
 	LAD  	gr1,	$com
 	PUSH 	0,gr1
-	LAD  	gr1,	116
+	LAD  	gr1,	47
 	PUSH 	0,gr1
 	POP  	gr2
 	POP  	gr1
